@@ -7,6 +7,7 @@ import datetime
 import dateutil.relativedelta
 import subprocess
 import difflib
+import json
 
 class Metric:
 
@@ -226,9 +227,6 @@ class Metric:
         else:
             # No contributors - no bus factor score
             return 0
-
-    def dependency_score(self, repo_name):
-      
 
 
     METRICS = {
