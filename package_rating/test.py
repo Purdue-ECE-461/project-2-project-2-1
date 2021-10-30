@@ -180,19 +180,21 @@ def test_print_all_cloudinary():
     m1 = Metric(os.environ["GITHUB_TOKEN"], ['https://github.com/cloudinary/cloudinary_npm'], log)
     all_scores = m1.calc_all()
 
-    assert m1.print_all_scores(all_scores) == "https://github.com/cloudinary/cloudinary_npm " + str(all_scores["cloudinary/cloudinary_npm"]["NET_SCORE"]) + str(all_scores["cloudinary/cloudinary_npm"]["RAMP_UP_SCORE"]) + str(all_scores["cloudinary/cloudinary_npm"]["CORRECTNESS_SCORE"]) + str(all_scores["cloudinary/cloudinary_npm"]["BUS_FACTOR_SCORE"]) + str(all_scores["cloudinary/cloudinary_npm"]["RESPONSIVE_MAINTAINER_SCORE"]) + str(all_scores["cloudinary/cloudinary_npm"]["LICENSE_SCORE"]) + "\n"
+    assert m1.print_all_scores(all_scores) == "https://github.com/cloudinary/cloudinary_npm " + str(round(all_scores["cloudinary/cloudinary_npm"]["NET_SCORE"],2)) +" "+ str(round(all_scores["cloudinary/cloudinary_npm"]["RAMP_UP_SCORE"],2)) +" "+ str(round(all_scores["cloudinary/cloudinary_npm"]["CORRECTNESS_SCORE"],2)) +" "+ str(round(all_scores["cloudinary/cloudinary_npm"]["BUS_FACTOR_SCORE"],2)) +" "+ str(round(all_scores["cloudinary/cloudinary_npm"]["RESPONSIVE_MAINTAINER_SCORE"],2)) +" "+ str(round(all_scores["cloudinary/cloudinary_npm"]["LICENSE_SCORE"],2)) + "\n"
 
 def test_print_all_nodist():
     # url 2
     m2 = Metric(os.environ["GITHUB_TOKEN"], ['https://github.com/nullivex/nodist'], log)
-    all_scores = m2.calc_all()    
-    assert m2.print_all_scores(all_scores) == "https://github.com/nullivex/nodist " + str(all_scores["nullivex/nodist"]["NET_SCORE"]) + str(all_scores["nullivex/nodist"]["RAMP_UP_SCORE"]) + str(all_scores["nullivex/nodist"]["CORRECTNESS_SCORE"]) + str(all_scores["nullivex/nodist"]["BUS_FACTOR_SCORE"]) + str(all_scores["nullivex/nodist"]["RESPONSIVE_MAINTAINER_SCORE"]) + str(all_scores["nullivex/nodist"]["LICENSE_SCORE"]) + "\n"
+    all_scores = m2.calc_all()
+    
+    assert m2.print_all_scores(all_scores) == "https://github.com/nullivex/nodist " + str(round(all_scores["nullivex/nodist"]["NET_SCORE"],2)) +" "+ str(round(all_scores["nullivex/nodist"]["RAMP_UP_SCORE"],2)) +" "+ str(round(all_scores["nullivex/nodist"]["CORRECTNESS_SCORE"],2)) +" "+ str(round(all_scores["nullivex/nodist"]["BUS_FACTOR_SCORE"],2)) +" "+ str(round(all_scores["nullivex/nodist"]["RESPONSIVE_MAINTAINER_SCORE"],2)) +" "+ str(round(all_scores["nullivex/nodist"]["LICENSE_SCORE"],2)) + "\n"
 
 def test_print_all_lodash():
     # url 3
     m3 = Metric(os.environ["GITHUB_TOKEN"], ['https://github.com/lodash/lodash'], log)
-    all_scores = m3.calc_all()    
-    assert m3.print_all_scores(all_scores) == "https://github.com/lodash/lodash " + str(all_scores["lodash/lodash"]["NET_SCORE"]) + str(all_scores["lodash/lodash"]["RAMP_UP_SCORE"]) + str(all_scores["lodash/lodash"]["CORRECTNESS_SCORE"]) + str(all_scores["lodash/lodash"]["BUS_FACTOR_SCORE"]) + str(all_scores["lodash/lodash"]["RESPONSIVE_MAINTAINER_SCORE"]) + str(all_scores["lodash/lodash"]["LICENSE_SCORE"]) + "\n"
+    all_scores = m3.calc_all()
+    
+    assert m3.print_all_scores(all_scores) == "https://github.com/lodash/lodash " + str(round(all_scores["lodash/lodash"]["NET_SCORE"],2)) +" "+ str(round(all_scores["lodash/lodash"]["RAMP_UP_SCORE"],2)) +" "+ str(round(all_scores["lodash/lodash"]["CORRECTNESS_SCORE"],2)) +" "+ str(round(all_scores["lodash/lodash"]["BUS_FACTOR_SCORE"],2)) +" "+ str(round(all_scores["lodash/lodash"]["RESPONSIVE_MAINTAINER_SCORE"],2)) +" "+ str(round(all_scores["lodash/lodash"]["LICENSE_SCORE"],2)) + "\n"
 
 def test_net_cloudinary():
     # url 1
