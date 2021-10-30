@@ -127,21 +127,28 @@ def test_license():
 def test_bus_factor():
     # url 1
     m = Metric(os.environ["GITHUB_TOKEN"], ['https://github.com/cloudinary/cloudinary_npm'], log)
+    help.clone_repo('https://github.com/cloudinary/cloudinary_npm', log) #N
     
     score = m.bus_factor("cloudinary/cloudinary_npm")
     assert score >= 0 and score <= 1
-
+    help.remove_repo(help.repo_clone_folder, log) #N
+    
     # url 2
     m = Metric(os.environ["GITHUB_TOKEN"], ['https://github.com/nullivex/nodist'], log)
+    help.clone_repo('https://github.com/nullivex/nodist', log) #N
     
     score = m.bus_factor("nullivex/nodist")
     assert score >= 0 and score <= 1
+    help.remove_repo(help.repo_clone_folder, log) #N
 
     # url 3
     m = Metric(os.environ["GITHUB_TOKEN"], ['https://github.com/lodash/lodash'], log)
+    help.clone_repo('https://github.com/lodash/lodash', log) #N
     
     score = m.bus_factor("lodash/lodash")
     assert score >= 0 and score <= 1
+    help.remove_repo(help.repo_clone_folder, log) #N
+    
     return
     
 def test_calc_all_cloudinary():
