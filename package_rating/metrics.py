@@ -228,6 +228,24 @@ class Metric:
             # No contributors - no bus factor score
             return 0
 
+    def dependency_score(self, repo_name):
+      package_file = os.path.join(help.repo_clone_folder, "package.json")
+      package_json = json.load(package_file)
+
+      if "dependencies" not in package_json.keys():
+        return 1.0
+      
+      else:
+        dependencies = package_json["dependencies"]
+        num_dependencies = len(dependencies)
+        num_pinned = 0
+        
+        for version in dependencies.values():
+          if "^" not in version and "~" not in version:
+            num_pinned += 1
+
+      return num_pinned / num_dependencies
+
 
     METRICS = {
         "RAMP_UP_SCORE": {
