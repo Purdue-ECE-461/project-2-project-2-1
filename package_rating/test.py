@@ -29,7 +29,9 @@ log.addHandler(handler)
 @pytest.mark.log
 def test_env_load():
     load_dotenv()
-    assert os.environ["LOG_FILE"] == "project-1-24.log"
+    assert os.environ["LOG_FILE"] != ""
+    assert os.environ["LOG_LEVEL"] != ""
+    assert os.environ["GITHUB_TOKEN"] != ""
 
 ### METRIC TESTS ###
 
@@ -150,6 +152,7 @@ def test_bus_factor():
     help.remove_repo(help.repo_clone_folder, log) #N
     
     return
+
 @pytest.mark.dependency
 def test_dependency():
     # url 1
@@ -279,8 +282,6 @@ def test_fetch_repo_commits():
     commits = ghub.get_repo_commit_statuses("cloudinary/cloudinary_npm")
     assert commits is not None and commits.totalCount > 0
     return
-
-
 
 
 ### TEST HELPER FUNCTIONS ###
