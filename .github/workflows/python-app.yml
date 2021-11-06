@@ -22,9 +22,9 @@ jobs:
           
     - name: Confirming environment variables
       run: |
-        echo GITHUB_TOKEN (length): ${#GITHUB_TOKEN}
-        echo LOG LEVEL: {LOG_LEVEL}
-        echo LOG FILE: ${LOG_FILE}
+        echo GITHUB_TOKEN length: ${#GITHUB_TOKEN}
+        echo LOG_LEVEL: {LOG_LEVEL}
+        echo LOG_FILE: ${LOG_FILE}
     - name: Set up Python 3.6.8
       uses: actions/setup-python@v2
       with:
