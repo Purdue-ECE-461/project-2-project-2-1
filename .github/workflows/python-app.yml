@@ -22,7 +22,7 @@ jobs:
     - name: Confirming environment variables
       run: |
         echo GITHUB_TOKEN length: ${#GITHUB_TOKEN}
-        echo LOG_LEVEL: {LOG_LEVEL}
+        echo LOG_LEVEL: ${LOG_LEVEL}
         echo LOG_FILE: ${LOG_FILE}
     - name: Set up Python 3.6.8
       uses: actions/setup-python@v2
@@ -44,4 +44,4 @@ jobs:
       run: |
         # install dependencies
         pip install -r package_rating/requirements.txt
-        coverage run -m pytest package_rating/test.py >> test_output.txt
+        coverage run -m pytest package_rating/test.py

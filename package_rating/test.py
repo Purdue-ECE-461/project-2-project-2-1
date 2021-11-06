@@ -61,6 +61,7 @@ def test_maintainer():
     return
 
 
+@pytest.mark.correctness
 def test_correctness():
     # url 1
     m = Metric(os.environ["GITHUB_TOKEN"], ['https://github.com/cloudinary/cloudinary_npm'], log)
@@ -81,6 +82,8 @@ def test_correctness():
     assert score >= 0 and score <= 1
     return
 
+
+@pytest.mark.ramp_up
 def test_ramp_up():
     # url 1
     m = Metric(os.environ["GITHUB_TOKEN"], ['https://github.com/cloudinary/cloudinary_npm'], log)
@@ -101,6 +104,7 @@ def test_ramp_up():
     assert score >= 0 and score <= 1
     return
 
+@pytest.mark.license
 def test_license():
     # url 1
     m1 = Metric(os.environ["GITHUB_TOKEN"], ['https://github.com/cloudinary/cloudinary_npm'], log)
@@ -126,6 +130,7 @@ def test_license():
     assert score >= 0 and score <= 1
     help.remove_repo(help.repo_clone_folder, log)
 
+@pytest.mark.bus_factor
 def test_bus_factor():
     # url 1
     m = Metric(os.environ["GITHUB_TOKEN"], ['https://github.com/cloudinary/cloudinary_npm'], log)
