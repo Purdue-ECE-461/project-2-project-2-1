@@ -33,4 +33,6 @@ jobs:
 #         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest
+        export LOG_LEVEL=0
+        export LOG_FILE=actions_test.log
+        pytest package_rating/test.py
