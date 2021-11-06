@@ -45,5 +45,3 @@ jobs:
         # install dependencies
         pip install -r package_rating/requirements.txt
         coverage run -m pytest package_rating/test.py >> test_output.txt
-        coverage report -m >> test_output.txt
-        python package_rating/print_tests.py test_output.txt
