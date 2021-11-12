@@ -30,7 +30,7 @@ app = Flask(__name__)
 # SIMPLE example of how uploading to Datastore works:
 kind = "Fruit"      # The kind for the new entity. Usually a "category" based on what you're storing
                         # Datastore of Foods -- kind = "Fruit" or "Grain", etc
-name = "strawberry"      # The name/ID for the new entity
+name = "apple"      # The name/ID for the new entity
                         # Datastore of foods -- kind = "apple" or "bread", etc
 
 # Each item/entity (things in datastore) has a: (KEY , PROPERTY1, PROPERTY2, ... )
