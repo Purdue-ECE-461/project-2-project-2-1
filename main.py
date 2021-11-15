@@ -18,44 +18,20 @@
 import datetime
 
 from flask import Flask, render_template
+from flask_restful import Api
 
 # Import the Google Cloud client library
 from google.cloud import datastore
+
+# Internal imports
+# Import your desired 
+from app_api_requests.create_package import CreatePackage as CreatePackage
 
 # Instantiates a client
 datastore_client = datastore.Client()
 
 app = Flask(__name__)
-
-# SIMPLE example of how uploading to Datastore works:
-kind = "Fruit"      # The kind for the new entity. Usually a "category" based on what you're storing
-                        # Datastore of Foods -- kind = "Fruit" or "Grain", etc
-name = "strawberry"      # The name/ID for the new entity
-                        # Datastore of foods -- kind = "apple" or "bread", etc
-
-# Each item/entity (things in datastore) has a: (KEY , PROPERTY1, PROPERTY2, ... )
-    # use the KEY to get specific item/element.
-        # to get the KEY(unique identifier):    key = kind + name = "Fruit_apple" or "Grain_bread"
-    # Use the PROPERTIES to filter your query. (a good property could be the file TYPE)
-        # Datastore of foods -- PROPERTY1 = Color
-        #                    -- PROPERTY2 = Texture
-# Think of the datastore as a giant excel table:
-# Items in Datasore: KEY=kind_name   | Property1 = "color"  | Property2 = "healthy" | ... 
-#         Fruit_apple                |         red          |        yes            | ... 
-#         Grain_bread                |         brown        |        yes            | ... 
-
-
-# CREATE KEY for the item
-newFood_key = datastore_client.key(kind, name) # The Cloud Datastore key for the new entity
-
-# CREATE new ENTITY/item ( using the "key = kind + name" )
-newFood = datastore.Entity(key=newFood_key)     # GET the item by it's KEY
-newFood["color"] = "red"                        # ASSIGN properties to the item/entity
-
-# ADD ENTITY/ITEM to the datastore. Saves the entity.
-datastore_client.put(newFood)
-
-print(f"Saved {newFood.key.name}: {newFood['color']}")
+api = Api(app)
 
 ###### Loop for Uploading and Fetching below #######
 
@@ -103,7 +79,6 @@ def root():
     # this return stmt: DISPLAYS the gotten info to the site's screen. (we don't need to show anything for the project2)
     return render_template('index.html', times=times)
 
-
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
     # Engine, a webserver process such as Gunicorn will serve the app. This
@@ -112,6 +87,7 @@ if __name__ == '__main__':
     # the "static" directory. See:
     # http://flask.pocoo.org/docs/1.0/quickstart/#static-files. Once deployed,
     # App Engine itself will serve those files as configured in app.yaml.
+    api.add_resource(CreatePackage, '/package')
     app.run(host='127.0.0.1', port=8080, debug=True)
 # [END gae_python3_render_template]
 # [END gae_python38_render_template]
