@@ -37,8 +37,8 @@ class UpdatePackage(Resource): # also why is this a POST request
         # Check that the ID in the path MATCHES the ID in the request body
         if (input_id != new_package_id):
             response = {
-                "description": "Malformed request (e.g. no such package)."
-                "Message": f"ID from path: {input_id}. Does not match ID in request body {new_package_id}."
+                "description": "Malformed request (e.g. no such package).",
+                "Message": "Inputted ID does not match ID in request body."
             }
             return response, 400 # should this be "jsonify{}"
 
@@ -54,8 +54,8 @@ class UpdatePackage(Resource): # also why is this a POST request
         # Check to see if this Name+Version+ID combo actually does exists in the registry
         if (len(results) == 0 ): # This Combo doesn't exist
             response = {
-                "description": "Malformed request (e.g. no such package)."
-                "Message": f"No package with  Name+Version+ID combo given in the request body."
+                "description": "Malformed request (e.g. no such package).",
+                "message": "Inputted ID does not match ID in request body."
             }
             return response, 400
         
@@ -68,21 +68,21 @@ class UpdatePackage(Resource): # also why is this a POST request
         # Update properties: https://cloud.google.com/datastore/docs/concepts/entities#properties_and_value_types
         package_entity.update(
             {
-                "Name" = new_package_name
-                "Version" = new_package_version
-                "ID" = input_id
-                "Content" = new_package_content
-                "URL" = new_package_url
-                "JSProgram" = new_package_js_program
+                "Name" : new_package_name,
+                "Version" : new_package_version,
+                "ID" : input_id,
+                "Content" : new_package_content,
+                "URL" : new_package_url,
+                "JSProgram" : new_package_js_program,
                 # Should we be re-computing these before uploading to the Datastore ...?
                 # Whenever we upload, we should compute the scores then ?
-                "RampUp" = 0    # package_entity["RampUp"]
-                "Correctness" = 0    # package_entity["Correctness"]
-                "BusFactor" = 0    # package_entity["BusFactor"]
-                "ResponsiveMaintainer" = 0    # package_entity["ResponsiveMaintainer"]
-                "LicenseScore" = 0    # package_entity["LicenseScore"]
-                "GoodPinningPractice" = 0    # package_entity["GoodPinningPractice"]
-                "Events" = []
+                "RampUp" : 0,    # package_entity["RampUp"]
+                "Correctness" : 0,    # package_entity["Correctness"]
+                "BusFactor" : 0,    # package_entity["BusFactor"]
+                "ResponsiveMaintainer" : 0 ,   # package_entity["ResponsiveMaintainer"]
+                "LicenseScore" : 0  ,  # package_entity["LicenseScore"]
+                "GoodPinningPractice" : 0 ,   # package_entity["GoodPinningPractice"]
+                "Events" : []
             }
         )
 
