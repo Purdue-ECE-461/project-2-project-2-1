@@ -71,12 +71,12 @@ class CreatePackage(Resource):
         package_entity['Content'] = package_content
         package_entity['URL'] = package_url
         package_entity['JSProgram'] = package_js_program
-        package_entity['RampUp'] = 0
-        package_entity['Correctness'] = 0
-        package_entity['BusFactor'] = 0
-        package_entity['ResponsiveMaintainer'] = 0
-        package_entity['LicenseScore'] = 0
-        package_entity['GoodPinningPractice'] = 0
+        package_entity['RampUp'] = -1
+        package_entity['Correctness'] = -1
+        package_entity['BusFactor'] = -1
+        package_entity['ResponsiveMaintainer'] = -1
+        package_entity['LicenseScore'] = -1
+        package_entity['GoodPinningPractice'] = -1
         package_entity['Events'] = []
 
         # Add entity to the registry
