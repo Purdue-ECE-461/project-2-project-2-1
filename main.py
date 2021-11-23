@@ -27,6 +27,7 @@ from google.cloud import datastore
 # Import your desired 
 from app_api_requests.create_package import CreatePackage as CreatePackage
 from app_api_requests.update_package import UpdatePackage as UpdatePackage
+from app_api_requests.reset import Reset
 
 # Instantiates a client
 datastore_client = datastore.Client()
@@ -81,6 +82,7 @@ def root():
 
 api.add_resource(CreatePackage, '/package' , endpoint='/package')
 api.add_resource(UpdatePackage, '/package/<string:id>') # resource_class_args : args.params to be forwards to constructor
+api.add_resource(Reset, '/reset', endpoint='/reset')
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
