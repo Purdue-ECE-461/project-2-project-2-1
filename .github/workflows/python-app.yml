@@ -36,5 +36,5 @@ jobs:
 
     - name: Test with PyTest
       run: |
-        coverage run -m pytest package_rating/test.py
+        coverage run -m pytest app_api_requests/package_rating/test.py
         coverage report -m
