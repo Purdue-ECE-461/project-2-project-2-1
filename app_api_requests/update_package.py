@@ -17,7 +17,7 @@ def print_to_stdout(*a):
 # @api.resource('/package/<string:id>')
 class UpdatePackage(Resource): # also why is this a POST request
     def put(self, id): # pass in URL path parameters
-        print_to_stdout("Request went through")
+        # print_to_stdout("Request went through")
         request.get_data() # Get everything from the request
 
         auth_header = request.headers.get('X-Authorization')

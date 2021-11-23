@@ -38,6 +38,8 @@ curl -i --location --request POST 'http://127.0.0.1:8080/package' \
 	}
 }'
 
+-----------
+
 Package Update By ID :
 
 curl -i --location --request PUT 'https://ece461-project2.ue.r.appspot.com/package/underscore' \
