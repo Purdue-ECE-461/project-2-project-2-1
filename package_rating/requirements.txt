@@ -1,7 +1,0 @@
-numpy
-PyGithub
-pytest
-python-dotenv
-python-dateutil
-hypothesis
-coverage
