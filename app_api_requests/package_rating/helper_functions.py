@@ -7,7 +7,7 @@ def url_handler(url):
 def normalize_metric(raw_score, max_score):
     return min(raw_score / max_score, 1) 
     
-repo_clone_folder = "repo_clone"
+repo_clone_folder = "/tmp/repo_clone"
 def clone_repo(url, log):
     # Clone repo to local folder
     log.info("Cloning repo " + url + " to local folder " + repo_clone_folder)
