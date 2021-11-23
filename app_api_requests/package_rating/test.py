@@ -1,6 +1,6 @@
 import pytest
 import logging
-from from app_api_requests.package_rating.api import *
+from app_api_requests.package_rating.api import *
 from app_api_requests.package_rating.metrics import Metric
 from dotenv import load_dotenv
 import app_api_requests.package_rating.helper_functions as help
