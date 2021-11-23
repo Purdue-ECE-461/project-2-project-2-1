@@ -15,9 +15,10 @@ class RatePackage(Resource):
 
         datastore_client = datastore.Client()
         
-
         package_key = datastore_client.key('package', id)
         package = datastore_client.get(package_key)
+        if package is None:
+            return {}, 400            
 
         ramp_up_score = package['RampUp']
         correctness_score = package['Correctness']
