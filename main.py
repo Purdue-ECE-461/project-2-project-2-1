@@ -25,7 +25,9 @@ from google.cloud import datastore
 
 # Internal imports
 # Import your desired 
-from app_api_requests.create_package import CreatePackage as CreatePackage
+from app_api_requests.create_package import CreatePackage
+from app_api_requests.rate_package import RatePackage
+from app_api_requests.reset import Reset
 
 # Instantiates a client
 datastore_client = datastore.Client()
@@ -80,6 +82,8 @@ def root():
     return render_template('index.html', times=times)
 
 api.add_resource(CreatePackage, '/package', endpoint='/package')
+api.add_resource(RatePackage, '/package/<string:id>/rate', endpoint='/package_rate')
+api.add_resource(Reset, '/reset', endpoint='/reset')
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
     # Engine, a webserver process such as Gunicorn will serve the app. This

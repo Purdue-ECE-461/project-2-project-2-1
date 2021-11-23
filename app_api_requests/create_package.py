@@ -5,6 +5,8 @@ from flask import request
 
 import json
 
+from app_api_requests.package_ingestion import compute_package_scores
+
 class CreatePackage(Resource):
     def post(self):
         request.get_data()
@@ -71,13 +73,24 @@ class CreatePackage(Resource):
         package_entity['Content'] = package_content
         package_entity['URL'] = package_url
         package_entity['JSProgram'] = package_js_program
-        package_entity['RampUp'] = 0
-        package_entity['Correctness'] = 0
-        package_entity['BusFactor'] = 0
-        package_entity['ResponsiveMaintainer'] = 0
-        package_entity['LicenseScore'] = 0
-        package_entity['GoodPinningPractice'] = 0
+        package_entity['RampUp'] = -1
+        package_entity['Correctness'] = -1
+        package_entity['BusFactor'] = -1
+        package_entity['ResponsiveMaintainer'] = -1
+        package_entity['LicenseScore'] = -1
+        package_entity['GoodPinningPractice'] = -1
         package_entity['Events'] = []
+
+        # Calculate scores
+        scores = compute_package_scores(package_url)
+        # If we choked at computing a metric, we scores dict would be empty
+        if scores:
+            package_entity['RampUp'] = scores['RAMP_UP_SCORE']
+            package_entity['Correctness'] = scores['CORRECTNESS_SCORE']
+            package_entity['BusFactor'] = scores['BUS_FACTOR_SCORE']
+            package_entity['ResponsiveMaintainer'] = scores['RESPONSIVE_MAINTAINER_SCORE']
+            package_entity['LicenseScore'] = scores['LICENSE_SCORE']
+            package_entity['GoodPinningPractice'] = scores['GOOD_PINNING_PRACTICE_SCORE']
 
         # Add entity to the registry
         datastore_client.put(package_entity)

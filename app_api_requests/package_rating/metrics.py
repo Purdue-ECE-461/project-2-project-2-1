@@ -1,8 +1,8 @@
 from typing import Match
-from helper_functions import normalize_metric
-from api import API
+from app_api_requests.package_rating.helper_functions import normalize_metric
+from app_api_requests.package_rating.api import API
 import os
-import helper_functions as help
+import app_api_requests.package_rating.helper_functions as help
 import datetime
 import dateutil.relativedelta
 import subprocess
@@ -269,6 +269,10 @@ class Metric:
         },
         "LICENSE_SCORE": {
             "func": license,
+            "weight": 1
+        },
+        "GOOD_PINNING_PRACTICE_SCORE": {
+            "func": dependency_score,
             "weight": 1
         }
     }
