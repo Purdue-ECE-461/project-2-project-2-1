@@ -28,7 +28,7 @@ class UpdatePackage(Resource): # also why is this a POST request
         # Get the inputted "id" from the URL path
         # input_id = request.args.get("id")
         # input_id = request.args['id']
-        # input_id = # get it from the the put() defintion
+        # input_id = id # get it from the the put() defintion
         input_id = request.view_args['id']
         
         # Get data from the request body
