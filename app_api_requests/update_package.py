@@ -4,9 +4,20 @@ from flask_restful import Resource
 from flask import request
 
 import json
+import sys
+ 
+ 
+def print_to_stdout(*a):
+ 
+    # Here a is the array holding the objects
+    # passed as the argument of the function
+    print(*a, file = sys.stdout)
 
+
+# @api.resource('/package/<string:id>')
 class UpdatePackage(Resource): # also why is this a POST request
-    def put(self, id): # pass in URL parameters
+    def put(self, id): # pass in URL path parameters
+        print_to_stdout("Request went through")
         request.get_data() # Get everything from the request
 
         auth_header = request.headers.get('X-Authorization')
@@ -16,7 +27,9 @@ class UpdatePackage(Resource): # also why is this a POST request
         
         # Get the inputted "id" from the URL path
         # input_id = request.args.get("id")
-        input_id = request.args['id']
+        # input_id = request.args['id']
+        # input_id = # get it from the the put() defintion
+        input_id = request.view_args['id']
         
         # Get data from the request body
         decoded_data = request.data.decode("utf-8") # Decode body of the data
