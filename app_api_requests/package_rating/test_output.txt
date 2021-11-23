@@ -1,0 +1,45 @@
+============================= test session starts ==============================
+platform linux -- Python 3.6.8, pytest-6.2.5, py-1.10.0, pluggy-1.0.0
+rootdir: /home/shay/a/li2962/ece461/project-2-project-2-1/package_rating
+plugins: hypothesis-6.24.0
+collected 21 items
+
+test.py F....................                                            [100%]
+
+=================================== FAILURES ===================================
+________________________________ test_env_load _________________________________
+
+    @pytest.mark.log
+    def test_env_load():
+        load_dotenv()
+>       assert os.environ["LOG_FILE"] == "project-1-24.log"
+E       AssertionError: assert 'log_file.log' == 'project-1-24.log'
+E         - project-1-24.log
+E         + log_file.log
+
+test.py:32: AssertionError
+=============================== warnings summary ===============================
+test.py:29
+  /home/shay/a/li2962/ece461/project-2-project-2-1/package_rating/test.py:29: PytestUnknownMarkWarning: Unknown pytest.mark.log - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/mark.html
+    @pytest.mark.log
+
+test.py:38
+  /home/shay/a/li2962/ece461/project-2-project-2-1/package_rating/test.py:38: PytestUnknownMarkWarning: Unknown pytest.mark.maintainer - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/mark.html
+    @pytest.mark.maintainer
+
+test.py:153
+  /home/shay/a/li2962/ece461/project-2-project-2-1/package_rating/test.py:153: PytestUnknownMarkWarning: Unknown pytest.mark.dependency - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/mark.html
+    @pytest.mark.dependency
+
+-- Docs: https://docs.pytest.org/en/stable/warnings.html
+=========================== short test summary info ============================
+FAILED test.py::test_env_load - AssertionError: assert 'log_file.log' == 'pro...
+============= 1 failed, 20 passed, 3 warnings in 130.12s (0:02:10) =============
+Name                  Stmts   Miss  Cover   Missing
+---------------------------------------------------
+api.py                   77     12    84%   19-26, 34-35, 46, 69
+helper_functions.py      19      4    79%   5, 22-25
+metrics.py              179     37    79%   69-76, 138-142, 151-155, 170, 182, 193, 202-226, 242, 319
+test.py                 193      5    97%   13, 15, 17, 19, 21
+---------------------------------------------------
+TOTAL                   468     58    88%

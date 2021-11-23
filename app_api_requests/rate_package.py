@@ -14,9 +14,7 @@ class RatePackage(Resource):
         # TODO: add authorization here in the future
 
         datastore_client = datastore.Client()
-        # query = datastore_client.query(kind='tokens')
-        # results = list(query.fetch())
-        # github_token = results[0]
+        
 
         package_key = datastore_client.key('package', id)
         package = datastore_client.get(package_key)
