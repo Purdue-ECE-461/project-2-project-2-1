@@ -25,7 +25,9 @@ from google.cloud import datastore
 
 # Internal imports
 # Import your desired 
+
 from app_api_requests.create_package import CreatePackage
+from app_api_requests.package_by_id import PackageById as PackageById
 from app_api_requests.rate_package import RatePackage
 from app_api_requests.reset import Reset
 
@@ -38,14 +40,13 @@ api = Api(app)
 ###### Loop for Uploading and Fetching below #######
 
 # [ UPLOADING ENTITIES/ITEMS TO DATASTORE ]
-# This store_time method:
-#  uses the Datastore client libraries to create a new "entity" in Datastore (upload == put!)
-# Datastore entities are:
-#   data objects that consist of keys and properties.
-# In this case, the entity's key is its custom kind, "visit".
-# The entity also has one property, timestamp, containing time of a page request.
-# entity = (key="visit", property1="timestamp", property2="", ...)
-
+    # This store_time method:
+    #  uses the Datastore client libraries to create a new "entity" in Datastore (upload == put!)
+    # Datastore entities are:
+    #   data objects that consist of keys and properties.
+    # In this case, the entity's key is its custom kind, "visit".
+    # The entity also has one property, timestamp, containing time of a page request.
+    # entity = (key="visit", property1="timestamp", property2="", ...)
 def store_time(dt):
     # setting the key
     entity = datastore.Entity(key=datastore_client.key('visit'))
@@ -58,10 +59,10 @@ def store_time(dt):
     datastore_client.put(entity) 
 
 # [ FETCHING ENTITIES/ITEMS FROM DATASTORE ]
-# This fetch_times method:
-# uses the key 'visit' to query the database >> "Get all the Entries/Uploads with teh key "visit".
-#  ( only get the 10 most recent "visit" entities)
-#  And then STORES those entities --(visit, time) pairings-- in a list (in descending order).
+    # This fetch_times method:
+    # uses the key 'visit' to query the database >> "Get all the Entries/Uploads with teh key "visit".
+    #  ( only get the 10 most recent "visit" entities)
+    #  And then STORES those entities --(visit, time) pairings-- in a list (in descending order).
 def fetch_times(limit):
     query = datastore_client.query(kind='visit')
     query.order = ['-timestamp'] # the "-" indicates descending order by the property "timestamp"
@@ -81,9 +82,12 @@ def root():
     # this return stmt: DISPLAYS the gotten info to the site's screen. (we don't need to show anything for the project2)
     return render_template('index.html', times=times)
 
+
 api.add_resource(CreatePackage, '/package', endpoint='/package')
+api.add_resource(PackageById, '/package/<string:id>')
 api.add_resource(RatePackage, '/package/<string:id>/rate', endpoint='/package_rate')
 api.add_resource(Reset, '/reset', endpoint='/reset')
+
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
     # Engine, a webserver process such as Gunicorn will serve the app. This
