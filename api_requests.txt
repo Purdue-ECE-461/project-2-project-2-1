@@ -22,6 +22,7 @@ curl --location --request POST 'https://ece461-project2.ue.r.appspot.com/package
 	}
 }'
 
+**Local version
 curl --location --request POST 'http://127.0.0.1:8080/package' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
 --data-raw '{
@@ -57,6 +58,7 @@ curl -i --location --request PUT 'https://ece461-project2.ue.r.appspot.com/packa
     }
 }'
 
+**Local version
 curl -i --location --request PUT 'http://127.0.0.1:8080/package/underscore_local' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
 --data-raw '{
@@ -75,23 +77,46 @@ curl -i --location --request PUT 'http://127.0.0.1:8080/package/underscore_local
 -----------
 
 GET Package By ID :
-** Make sure that there the ID in the URL matches an ID in the database
+** Make sure that the ID in the URL matches an ID in the database
 
 curl -i --location --request GET 'https://ece461-project2.ue.r.appspot.com/package/underscore' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
 
+**Local version
 curl -i --location --request GET 'http://127.0.0.1:8080/package/underscore_local' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
 
 -----------
 
 DELETE Package By ID :
-** Make sure that there the ID in the URL matches an ID in the database
+** Make sure that the ID in the URL matches an ID in the database
 
 curl -i --location --request DELETE 'https://ece461-project2.ue.r.appspot.com/package/underscore' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
 
+**Local version
 curl -i --location --request DELETE 'http://127.0.0.1:8080/package/underscore_local' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
 
 -----------
+
+Package Rating Testing:
+curl --location --request GET 'https://ece461-project2.ue.r.appspot.com/package/underscore/rate' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+
+
+**Local version
+curl --location --request GET 'http://127.0.0.1:8080/package/underscore/rate' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+
+
+-----------
+
+Registry Reset:
+curl --location --request DELETE 'https://ece461-project2.ue.r.appspot.com/reset' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+
+**Local version
+curl --location --request DELETE 'http://127.0.0.1:8080/reset' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+

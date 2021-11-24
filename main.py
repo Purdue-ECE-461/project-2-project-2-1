@@ -25,8 +25,10 @@ from google.cloud import datastore
 
 # Internal imports
 # Import your desired 
-from app_api_requests.create_package import CreatePackage as CreatePackage
+
+from app_api_requests.create_package import CreatePackage
 from app_api_requests.package_by_id import PackageById as PackageById
+from app_api_requests.rate_package import RatePackage
 from app_api_requests.reset import Reset
 
 # Instantiates a client
@@ -80,8 +82,10 @@ def root():
     # this return stmt: DISPLAYS the gotten info to the site's screen. (we don't need to show anything for the project2)
     return render_template('index.html', times=times)
 
-api.add_resource(CreatePackage, '/package')
-api.add_resource(PackageById, '/package/<string:id>') # resource_class_args : args.params to be forwards to constructor
+
+api.add_resource(CreatePackage, '/package', endpoint='/package')
+api.add_resource(PackageById, '/package/<string:id>')
+api.add_resource(RatePackage, '/package/<string:id>/rate', endpoint='/package_rate')
 api.add_resource(Reset, '/reset', endpoint='/reset')
 
 if __name__ == '__main__':
