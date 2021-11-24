@@ -15,7 +15,7 @@ def print_to_stdout(*a):
 
 
 # @api.resource('/package/<string:id>')
-class UpdatePackage(Resource): # also why is this a POST request
+class PackageById(Resource): # also why is this a POST request
     def put(self, id): # pass in URL path parameters
         # print_to_stdout("Request went through")
         request.get_data() # Get everything from the request
@@ -28,7 +28,7 @@ class UpdatePackage(Resource): # also why is this a POST request
         # Get the inputted "id" from the URL path
         # input_id = request.args.get("id")
         # input_id = request.args['id']
-        # input_id = id # get it from the the put() defintion
+        # input_id = # get it from the the put() defintion
         input_id = request.view_args['id']
         
         # Get data from the request body
@@ -108,3 +108,77 @@ class UpdatePackage(Resource): # also why is this a POST request
 
         # Return response body and code
         return response, 200    # jsonify{response}
+
+    def get(self, id):
+        print_to_stdout("GET Request went through")
+        # This request has NO request body to utilize
+        # And DO NOT update the database
+        # Simply GETS info based on the ID --> and Returns the Response JSON
+        request.get_data() # Get everything from the request
+
+        auth_header = request.headers.get('X-Authorization')
+        if auth_header is None:
+            return {}, 400
+        # TODO: add authorization here in the future
+        
+        # Get the inputted "id" from the URL path
+        input_id = request.view_args['id']
+        
+        # Check that the Name, Version, and ID --> Produce a Package
+        datastore_client = datastore.Client()
+
+        query = datastore_client.query(kind='package')
+        query.add_filter("ID", "=", input_id) # same as new_package_id
+        results = list(query.fetch())
+
+
+        # Check to see if the ID exists in the registry
+        if (len(results) == 0 ): # This ID doesn't exist
+            response = {
+                "description": "Malformed request (e.g. no such ID in database).",
+                "message": "Inputted ID is not in the datastore."
+            }
+            return response, 400
+        elif (len(results) >= 2 ): # There are 2 IDs in the database. This should not happen ever.
+            response = {
+                "description": "Malformed request",
+                "message": "The inputted ID is seen more than once in the datastore."
+            }
+            return response, 400
+        
+
+        # If we get here: Return the package 
+        # Get the package/entity
+        key = datastore_client.key('package', input_id)
+        package_entity = datastore.Entity(key, exclude_from_indexes=["Content"])
+
+        
+        package_to_return = datastore_client.get(key)
+
+        # I should do a try-catch here
+        response = {
+            "metadata": {
+                "Name": package_to_return["Name"],
+                "Version": package_to_return["Version"],
+                "ID": package_to_return["ID"]
+            },
+            "data": {
+                "Content": package_to_return["Content"],
+                "URL": package_to_return["URL"],
+                "JSProgram": package_to_return["JSProgram"]
+            }
+        }
+
+        # Return response body and code
+        
+        return response, 200
+
+
+    def delete(self, id):
+        response = {
+            'Success': "not implemented"
+        }
+
+        # Return response body and code
+        
+        return response, 200        
