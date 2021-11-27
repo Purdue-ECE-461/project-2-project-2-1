@@ -41,7 +41,7 @@ class Authenticate(Resource):
             recorded_user = datastore_client.get(key)
             recorded_password = recorded_user["password"]
 
-            if (recorded_password != input_password)
+            if (recorded_password != input_password):
                 response = {
                     "message": "Incorrect password"
                 }
@@ -55,7 +55,7 @@ class Authenticate(Resource):
             return response, 200
 
         # User DOES NOT exist.
-        else
+        else:
             response = {
                 "message": "Invalid User. Username is not in the Datastore."
             }
