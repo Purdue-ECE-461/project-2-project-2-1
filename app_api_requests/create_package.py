@@ -4,8 +4,13 @@ from flask_restful import Resource
 from flask import request
 
 import json
+import base64
 
 from app_api_requests.package_ingestion import compute_package_scores
+import sys
+ 
+def print_to_stdout(*a):
+    print(*a, file = sys.stdout)
 
 class CreatePackage(Resource):
     def post(self):
@@ -38,31 +43,46 @@ class CreatePackage(Resource):
             desired_id = data_dict['metadata']['ID']
 
             package_js_program = data_dict['data']['JSProgram']
+
         except Exception:
             response = {
                 "message": "Malformed Request. Error getting values from request body."
             }
             return response, 400
 
-        # Checking the "Content" field
-        if (data_dict['data']['Content'] is None): # No "Content" field --> Ingestion, URL in request body:
+        # Set variables to "". Thye will get overwritten if the request_body has the values.
+        package_url = ""
+        package_content = ""
+
+        # Check the "Content" field
+        try:
+            package_content = data_dict['data']['Content']
+        
+        except Exception: # if try fails --> No "Content" field --> Ingestion
+            # For Ingestion, the "URL" field is in request_body
             package_url = data_dict['data']['URL']
+
             # Check the rating scores.
             # IF: any scores < 0.5
             # THEN: don't upload the package
             
             # Calculate scores
             scores = compute_package_scores(package_url)
-            if not( all(i >= 0.5 for i in scores) ): # if: 1 or more of the scores are <0.5 --> Don't upload the package
+            print_to_stdout(scores)
+            valid_scores = ( (float(scores['RAMP_UP_SCORE']) >= 0.5)
+                                & (float(scores['CORRECTNESS_SCORE']) >= 0.5)
+                                & (float(scores['BUS_FACTOR_SCORE']) >= 0.5)
+                                & (float(scores['RESPONSIVE_MAINTAINER_SCORE']) >= 0.5)
+                                & (float(scores['LICENSE_SCORE']) >= 0.5)
+                                & (float(scores['GOOD_PINNING_PRACTICE_SCORE']) >= 0.5)
+                            )
+            if not( valid_scores ): # if: 1 or more of the scores are <0.5 --> Don't upload the package
                 response = {
                     "message": "1 or more Rating Scores <0.5. Unable to Upload."
                 }
                 return response, 400
             # else: all the Scores are >=0.5! Yay, continue to upload/create the package.
         
-        else: # "Content" field DOES exist --> Regular Creation of Package:
-            package_content = data_dict['data']['Content']
-            # TODO: How do we give the package a "Content" field if we do Ingestion ??
 
         # Check to see if the package already exists in the registry
         query = datastore_client.query(kind='package')
@@ -118,24 +138,36 @@ class CreatePackage(Resource):
         package_entity['Events'] = []
 
         # Calculate scores
-        scores = compute_package_scores(package_url)
-        # If we choked at computing a metric, we scores dict would be empty
-        if scores:
-            package_entity['RampUp'] = scores['RAMP_UP_SCORE']
-            package_entity['Correctness'] = scores['CORRECTNESS_SCORE']
-            package_entity['BusFactor'] = scores['BUS_FACTOR_SCORE']
-            package_entity['ResponsiveMaintainer'] = scores['RESPONSIVE_MAINTAINER_SCORE']
-            package_entity['LicenseScore'] = scores['LICENSE_SCORE']
-            package_entity['GoodPinningPractice'] = scores['GOOD_PINNING_PRACTICE_SCORE']
+        if (package_url != ""): # this is redundant, we can clean it up later lol
+            scores = compute_package_scores(package_url)
+            # If we choked at computing a metric, we scores dict would be empty
+            if scores:
+                package_entity['RampUp'] = scores['RAMP_UP_SCORE']
+                package_entity['Correctness'] = scores['CORRECTNESS_SCORE']
+                package_entity['BusFactor'] = scores['BUS_FACTOR_SCORE']
+                package_entity['ResponsiveMaintainer'] = scores['RESPONSIVE_MAINTAINER_SCORE']
+                package_entity['LicenseScore'] = scores['LICENSE_SCORE']
+                package_entity['GoodPinningPractice'] = scores['GOOD_PINNING_PRACTICE_SCORE']
 
-        # Add entity to the registry
-        datastore_client.put(package_entity)
+            # Add entity to the registry
+            datastore_client.put(package_entity)
 
-        response = {
-            'Name': package_name,
-            'Version': package_version,
-            'ID': package_id
-        }
-
-        # Return response body and code
-        return response, 201
+            response = {
+                'Name': package_name,
+                'Version': package_version,
+                'ID': package_id
+            }
+            # Return response body and code
+            return response, 201
+        
+        else: # if the package_url is empty (""), then we have to use the "Content" field to get the Rating Scores
+            #print_to_stdout(package_content)
+            # decoded_content = package_content.decode("UTF-8")
+            
+            decoded_content = base64.b64decode(package_content).decode("UTF-8")
+            print_to_stdout(decoded_content)
+            
+            response = {
+                'message': "IF: the package_url is empty, THEN: we have to use the Content field to get the Rating Scores."
+            }
+            return response, 400
