@@ -10,11 +10,25 @@ from app_api_requests.package_ingestion import compute_package_scores
 class CreatePackage(Resource):
     def post(self):
         request.get_data()
-        auth_header = request.headers.get('X-Authorization')
-        if auth_header is None:
-            return {}, 400
-        # TODO: add authorization here in the future
         
+        # User Authentication:
+        auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
+        token = auth_header.split()[1] # token = "[token]"
+        
+        # If token is in the database --> valid user
+        datastore_client = datastore.Client()
+        query = datastore_client.query(kind='user')
+        query.add_filter("bearerToken", "=", token)
+        results = list(query.fetch())
+
+        if len(results) == 0: # The token is NOT in the database --> Invalid user
+            response = {
+                'message': "Unauthorized user. Bearer Token is not in the datastore."
+            }
+            return response, 400
+        # else, the user is in the database. Carry on.
+    
+
         decoded_data = request.data.decode("utf-8")
         data_dict = json.loads(decoded_data)
         
@@ -29,7 +43,6 @@ class CreatePackage(Resource):
         except Exception:
             return {}, 400
 
-        datastore_client = datastore.Client()
 
         # Check to see if the package already exists in the registry
         query = datastore_client.query(kind='package')
@@ -38,7 +51,10 @@ class CreatePackage(Resource):
         results = list(query.fetch())
 
         if len(results):
-            return {}, 403
+            response = {
+                "message": "A package with that Name and Version already exists in the datastore."
+            }
+            return response, 403
 
         # Check to see if the ID already exists in the registry
         new_id_needed = False
