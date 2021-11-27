@@ -2,6 +2,7 @@ from google.cloud import datastore
 
 from flask_restful import Resource
 from flask import request
+import sys
 
 import json
 from uuid import uuid4
@@ -22,7 +23,10 @@ class Authenticate(Resource):
 
             input_password = request_body['Secret']['password']
         except Exception:
-            return {"message": "Error getting values from request body."}, 401
+            response = {
+                "message": "Error getting values from request body."
+            }
+            return response, 401
 
         datastore_client = datastore.Client()
 
@@ -35,7 +39,7 @@ class Authenticate(Resource):
         # No need to generate a new auth token.
         # CHECK THE PASSWORD
         # Return the Bearer Token.
-        if len(results == 1):
+        if len(results) == 1:
             # CHECK THE PASSWORD
             key = datastore_client.key('user', input_name)
             recorded_user = datastore_client.get(key)
@@ -45,6 +49,7 @@ class Authenticate(Resource):
                 response = {
                     "message": "Incorrect password"
                 }
+
                 return response, 401
             
             # If we get here, then the password is right.

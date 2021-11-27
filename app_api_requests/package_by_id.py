@@ -17,19 +17,25 @@ class PackageById(Resource): # also why is this a POST request
         # print_to_stdout("PUT request went through")
         request.get_data() # Get everything from the request/URL (path params)
 
-        bearer = request.headers.get('X-Authorization')
+        auth_header = request.headers.get('X-Authorization')
         token = auth_header.split()[1]
-        print_to_stdout("auth_header: " + auth_header)
-        print_to_stdout("token: " + token)
+        # print_to_stdout("auth_header: " + auth_header)
+        # print_to_stdout("token: " + token)
         
-        if token is None: # if token is in the database --> valid user
-            return {}, 400
-        # TODO: add authorization here in the future
-        
+        # If token is in the database --> valid user
+        datastore_client = datastore.Client()
+        query = datastore_client.query(kind='user')
+        query.add_filter("bearerToken", "=", token)
+        results = list(query.fetch())
+
+        if len(results) == 0: # The token is NOT in the database --> Invalid user
+            response = {
+                'message': "Unauthorized user. Bearer Token is not in the datastore."
+            }
+            return response, 400
+        # else, the user is in the database. Carry on.
+     
         # Get the inputted "id" from the URL path
-        # input_id = request.args.get("id")
-        # input_id = request.args['id']
-        # input_id = # get it from the the put() defintion
         input_id = request.view_args['id']
         
         # Get data from the request body
