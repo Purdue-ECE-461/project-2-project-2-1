@@ -17,8 +17,12 @@ class PackageById(Resource): # also why is this a POST request
         # print_to_stdout("PUT request went through")
         request.get_data() # Get everything from the request/URL (path params)
 
-        auth_header = request.headers.get('X-Authorization')
-        if auth_header is None:
+        bearer = request.headers.get('X-Authorization')
+        token = auth_header.split()[1]
+        print_to_stdout("auth_header: " + auth_header)
+        print_to_stdout("token: " + token)
+        
+        if token is None: # if token is in the database --> valid user
             return {}, 400
         # TODO: add authorization here in the future
         
@@ -42,7 +46,7 @@ class PackageById(Resource): # also why is this a POST request
             new_package_js_program = request_body['data']['JSProgram']
 
         except Exception:
-            return {}, 400
+            return {"message": "Error getting values from request body."}, 400
 
         # Check that the ID in the PATH matches the ID in the request body
         if (input_id != new_package_id):
