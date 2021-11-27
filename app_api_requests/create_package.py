@@ -37,12 +37,32 @@ class CreatePackage(Resource):
             package_version = data_dict['metadata']['Version']
             desired_id = data_dict['metadata']['ID']
 
-            package_content = data_dict['data']['Content']
-            package_url = data_dict['data']['URL']
             package_js_program = data_dict['data']['JSProgram']
         except Exception:
-            return {}, 400
+            response = {
+                "message": "Malformed Request. Error getting values from request body."
+            }
+            return response, 400
 
+        # Checking the "Content" field
+        if (data_dict['data']['Content'] is None): # No "Content" field --> Ingestion, URL in request body:
+            package_url = data_dict['data']['URL']
+            # Check the rating scores.
+            # IF: any scores < 0.5
+            # THEN: don't upload the package
+            
+            # Calculate scores
+            scores = compute_package_scores(package_url)
+            if not( all(i >= 0.5 for i in scores) ): # if: 1 or more of the scores are <0.5 --> Don't upload the package
+                response = {
+                    "message": "1 or more Rating Scores <0.5. Unable to Upload."
+                }
+                return response, 400
+            # else: all the Scores are >=0.5! Yay, continue to upload/create the package.
+        
+        else: # "Content" field DOES exist --> Regular Creation of Package:
+            package_content = data_dict['data']['Content']
+            # TODO: How do we give the package a "Content" field if we do Ingestion ??
 
         # Check to see if the package already exists in the registry
         query = datastore_client.query(kind='package')
@@ -52,7 +72,7 @@ class CreatePackage(Resource):
 
         if len(results):
             response = {
-                "message": "A package with that Name and Version already exists in the datastore."
+                "message": "Package with that Name and Version already exists in the datastore."
             }
             return response, 403
 

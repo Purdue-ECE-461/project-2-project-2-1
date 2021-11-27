@@ -51,7 +51,10 @@ class PackageById(Resource): # also why is this a POST request
             new_package_js_program = request_body['data']['JSProgram']
 
         except Exception:
-            return {"message": "Error getting values from request body."}, 400
+            response = {
+                "message": "Error getting values from request body."
+            }
+            return response, 400
 
         # Check that the ID in the PATH matches the ID in the request body
         if (input_id != new_package_id):

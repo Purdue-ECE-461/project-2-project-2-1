@@ -40,8 +40,41 @@ curl -i --location --request POST 'http://127.0.0.1:8080/package' \
 
 -----------
 
+Package Ingestion: (no "Content" field)
+
+curl --location --request POST 'https://ece461-project2.ue.r.appspot.com/package' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
+--data-raw '{
+	"metadata": {
+		"Name": "Underscore",
+		"Version": "1.0.0",
+		"ID": "underscore"
+	},
+	"data": {
+		"URL": "https://github.com/jashkenas/underscore",
+		"JSProgram": "if (process.argv.length === 7) {\nconsole.log('\''Success'\'')\nprocess.exit(0)\n} else {\nconsole.log('\''Failed'\'')\nprocess.exit(1)\n}\n"
+	}
+}'
+
+**Local version
+curl -i --location --request POST 'http://127.0.0.1:8080/package' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
+--data-raw '{
+	"metadata": {
+		"Name": "Underscore",
+		"Version": "1.0.1",
+		"ID": "underscore_local"
+	},
+	"data": {
+		"URL": "https://github.com/jashkenas/underscore",
+		"JSProgram": "if (process.argv.length === 7) {\nconsole.log('\''Success'\'')\nprocess.exit(0)\n} else {\nconsole.log('\''Failed'\'')\nprocess.exit(1)\n}\n"
+	}
+}'
+
+-----------
+
 Package Update By ID :
-** Make sure to UPLOAD a package to the datastre, before you try to UPDATE the package.
+** Make sure to UPLOAD a package to the datastore, before you try to UPDATE the package.
 
 curl -i --location --request PUT 'https://ece461-project2.ue.r.appspot.com/package/underscore' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
