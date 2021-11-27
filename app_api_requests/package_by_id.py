@@ -17,10 +17,9 @@ class PackageById(Resource): # also why is this a POST request
         # print_to_stdout("PUT request went through")
         request.get_data() # Get everything from the request/URL (path params)
 
-        auth_header = request.headers.get('X-Authorization')
-        token = auth_header.split()[1]
-        # print_to_stdout("auth_header: " + auth_header)
-        # print_to_stdout("token: " + token)
+        # User Authentication:
+        auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
+        token = auth_header.split()[1] # token = "[token]"
         
         # If token is in the database --> valid user
         datastore_client = datastore.Client()

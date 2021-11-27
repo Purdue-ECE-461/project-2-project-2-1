@@ -8,12 +8,23 @@ import json
 class RatePackage(Resource):
     def get(self, id):
         request.get_data()
-        auth_header = request.headers.get('X-Authorization')
-        if auth_header is None:
-            return {}, 400
-        # TODO: add authorization here in the future
-
+        
+        # User Authentication:
+        auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
+        token = auth_header.split()[1] # token = "[token]"
+        
+        # If token is in the database --> valid user
         datastore_client = datastore.Client()
+        query = datastore_client.query(kind='user')
+        query.add_filter("bearerToken", "=", token)
+        results = list(query.fetch())
+
+        if len(results) == 0: # The token is NOT in the database --> Invalid user
+            response = {
+                'message': "Unauthorized user. Bearer Token is not in the datastore."
+            }
+            return response, 400
+        # else, the user is in the database. Carry on.
         
         package_key = datastore_client.key('package', id)
         package = datastore_client.get(package_key)
