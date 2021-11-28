@@ -8,6 +8,8 @@ import base64
 
 from app_api_requests.package_ingestion import compute_package_scores
 import sys
+
+from zipfile import ZipFile
  
 def print_to_stdout(*a):
     print(*a, file = sys.stdout)
@@ -161,13 +163,14 @@ class CreatePackage(Resource):
             return response, 201
         
         else: # if the package_url is empty (""), then we have to use the "Content" field to get the Rating Scores
-            #print_to_stdout(package_content)
-            # decoded_content = package_content.decode("UTF-8")
+            decoded_bytes = base64.b64decode(package_content)
+            file_decoded = open('decoded_content.zip', 'wb') # open a new empty file, to write to
+            file_decoded.write(decoded_bytes)
+            file_decoded.close()
             
-            decoded_content = base64.b64decode(package_content).decode("UTF-8")
-            print_to_stdout(decoded_content)
-            
+            print(file_text) # or do whatever
+
             response = {
                 'message': "IF: the package_url is empty, THEN: we have to use the Content field to get the Rating Scores."
             }
-            return response, 400
+            return response, 200
