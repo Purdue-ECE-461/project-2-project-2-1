@@ -174,9 +174,12 @@ class CreatePackage(Resource):
                         shutil.copyfileobj(source, target)
             except Exception:
                 response = {
-                    "message": "Error getting the package.json from zipfile. package.json may not be included."
+                    'Name': package_name,
+                    'Version': package_version,
+                    'ID': package_id
+                    "message": "Rating Feature will not be availabe for this package, since no package.json was found in the provided zipfile."
                 }
-                return response, 400
+                return response, 201
                 
             # "package.json" --> get the URL
             try:
