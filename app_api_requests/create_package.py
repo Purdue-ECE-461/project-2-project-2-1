@@ -4,6 +4,7 @@ from flask_restful import Resource
 from flask import request
 
 import json
+import os
 
 from app_api_requests.package_ingestion import compute_package_scores
 
@@ -16,6 +17,7 @@ class CreatePackage(Resource):
         token = auth_header.split()[1] # token = "[token]"
         
         # If token is in the database --> valid user
+        print("GAE_ENV: ", os.getenv('GAE_ENV', ''))
         datastore_client = datastore.Client()
         query = datastore_client.query(kind='user')
         query.add_filter("bearerToken", "=", token)
