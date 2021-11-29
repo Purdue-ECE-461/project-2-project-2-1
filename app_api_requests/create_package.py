@@ -10,6 +10,10 @@ from app_api_requests.package_ingestion import compute_package_scores
 import sys
 
 from zipfile import ZipFile
+import os
+import shutil
+
+
  
 def print_to_stdout(*a):
     print(*a, file = sys.stdout)
@@ -52,7 +56,7 @@ class CreatePackage(Resource):
             }
             return response, 400
 
-        # Set variables to "". Thye will get overwritten if the request_body has the values.
+        # Set variables to "". They will get overwritten if the request_body has the values.
         package_url = ""
         package_content = ""
 
@@ -70,7 +74,7 @@ class CreatePackage(Resource):
             
             # Calculate scores
             scores = compute_package_scores(package_url)
-            print_to_stdout(scores)
+            # print_to_stdout(scores)
             valid_scores = ( (float(scores['RAMP_UP_SCORE']) >= 0.5)
                                 & (float(scores['CORRECTNESS_SCORE']) >= 0.5)
                                 & (float(scores['BUS_FACTOR_SCORE']) >= 0.5)
@@ -140,37 +144,75 @@ class CreatePackage(Resource):
         package_entity['Events'] = []
 
         # Calculate scores
-        if (package_url != ""): # this is redundant, we can clean it up later lol
-            scores = compute_package_scores(package_url)
-            # If we choked at computing a metric, we scores dict would be empty
-            if scores:
-                package_entity['RampUp'] = scores['RAMP_UP_SCORE']
-                package_entity['Correctness'] = scores['CORRECTNESS_SCORE']
-                package_entity['BusFactor'] = scores['BUS_FACTOR_SCORE']
-                package_entity['ResponsiveMaintainer'] = scores['RESPONSIVE_MAINTAINER_SCORE']
-                package_entity['LicenseScore'] = scores['LICENSE_SCORE']
-                package_entity['GoodPinningPractice'] = scores['GOOD_PINNING_PRACTICE_SCORE']
+        if (package_url == ""): # if the package_url is empty (""), then we have to use the "Content" field to get the package_url
+            # base64 Content-string --> Zip File ('decoded_content.zip')
+            try:
+                decoded_bytes = base64.b64decode(package_content)
+                file_decoded = open('decoded_content.zip', 'wb') # open a new empty file, to write to
+                file_decoded.write(decoded_bytes)
+                file_decoded.close()
+            except Exception:
+                response = {
+                    "message": "Error decoding the Content-string in the request body."
+                }
+                return response, 400
 
-            # Add entity to the registry
-            datastore_client.put(package_entity)
+            # Zip File ('decoded_content.zip') --> Get the "package.json" from it
+            try: 
+                names = []
+                with ZipFile('decoded_content.zip', 'r') as zipObj:
+                    for info in zipObj.infolist():
+                        if (info.is_dir()):
+                            if "_" not in (info.filename):
+                                names.append(info.filename) # only want the folder that holds the package.json
+                    # print_to_stdout(names)
+                    
+                    # Copy the file from the Zipfile --> Save it to our current directory
+                    source = zipObj.open(names[0]+"package.json")
+                    target = open("package.json", "wb")
+                    with source, target:
+                        shutil.copyfileobj(source, target)
+            except Exception:
+                response = {
+                    "message": "Error getting the package.json from zipfile. package.json may not be included."
+                }
+                return response, 400
+                
+            # "package.json" --> get the URL
+            try:
+                with open("package.json") as json_file:
+                    data = json.load(json_file) # data holds everything
+                    url = data['repository']['url']
+                    package_url = url[4:] # trim the "git+" off the URL
+                    # print_to_stdout(package_url)
+            except Exception:
+                response = {
+                    "message": "Error getting the URL from the package.json."
+                }
+                return response, 400
 
-            response = {
-                'Name': package_name,
-                'Version': package_version,
-                'ID': package_id
-            }
-            # Return response body and code
-            return response, 201
-        
-        else: # if the package_url is empty (""), then we have to use the "Content" field to get the Rating Scores
-            decoded_bytes = base64.b64decode(package_content)
-            file_decoded = open('decoded_content.zip', 'wb') # open a new empty file, to write to
-            file_decoded.write(decoded_bytes)
-            file_decoded.close()
-            
-            print(file_text) # or do whatever
+        # If we make it here, then we successfully got the package_url !!
+        # YAY. continue on with business as usual:
+           
+        scores = compute_package_scores(package_url)
+        # If we choked at computing a metric, we scores dict would be empty
+        if scores:
+            package_entity['RampUp'] = scores['RAMP_UP_SCORE']
+            package_entity['Correctness'] = scores['CORRECTNESS_SCORE']
+            package_entity['BusFactor'] = scores['BUS_FACTOR_SCORE']
+            package_entity['ResponsiveMaintainer'] = scores['RESPONSIVE_MAINTAINER_SCORE']
+            package_entity['LicenseScore'] = scores['LICENSE_SCORE']
+            package_entity['GoodPinningPractice'] = scores['GOOD_PINNING_PRACTICE_SCORE']
+            # TODO: why is there no "NET SCORE" value ??
 
-            response = {
-                'message': "IF: the package_url is empty, THEN: we have to use the Content field to get the Rating Scores."
-            }
-            return response, 200
+        # Add entity to the registry
+        datastore_client.put(package_entity)
+
+        response = {
+            'Name': package_name,
+            'Version': package_version,
+            'ID': package_id
+        }
+
+        # Return response body and code
+        return response, 201
