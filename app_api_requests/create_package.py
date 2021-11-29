@@ -173,8 +173,13 @@ class CreatePackage(Resource):
                     with source, target:
                         shutil.copyfileobj(source, target)
             except Exception:
+                # Add entity to the registry. Without updating the scores from "-1"
+                datastore_client.put(package_entity)                
                 response = {
-                    "message": "Error getting the package.json from zipfile. package.json may not be included."
+                    'Name': package_name,
+                    'Version': package_version,
+                    'ID': package_id,
+                    "message": "Rating Feaure will not be available for this package, since it does not contain a package.json in the zipfile provided in the CONTENT-field of the request body."
                 }
                 return response, 400
                 
