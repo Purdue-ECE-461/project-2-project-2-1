@@ -17,7 +17,6 @@ class CreatePackage(Resource):
         token = auth_header.split()[1] # token = "[token]"
         
         # If token is in the database --> valid user
-        print("GAE_ENV: ", os.getenv('GAE_ENV', ''))
         datastore_client = datastore.Client()
         query = datastore_client.query(kind='user')
         query.add_filter("bearerToken", "=", token)
@@ -25,7 +24,8 @@ class CreatePackage(Resource):
 
         if len(results) == 0: # The token is NOT in the database --> Invalid user
             response = {
-                'message': "Unauthorized user. Bearer Token is not in the datastore."
+                'message': "Unauthorized user. Bearer Token is not in the datastore.",
+                'remove_this': os.getenv('GAE_ENV', '')                
             }
             return response, 400
         # else, the user is in the database. Carry on.
