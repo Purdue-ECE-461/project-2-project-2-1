@@ -4,10 +4,21 @@ from flask_restful import Resource
 from flask import request
 
 import json
-import os
+import base64
 
 from app_api_requests.package_ingestion import compute_package_scores
 from app_api_requests.datastore_client_factory import get_datastore_client
+
+import sys
+
+from zipfile import ZipFile
+import os
+import shutil
+
+
+ 
+def print_to_stdout(*a):
+    print(*a, file = sys.stdout)
 
 class CreatePackage(Resource):
     def post(self):
@@ -39,12 +50,47 @@ class CreatePackage(Resource):
             package_version = data_dict['metadata']['Version']
             desired_id = data_dict['metadata']['ID']
 
-            package_content = data_dict['data']['Content']
-            package_url = data_dict['data']['URL']
             package_js_program = data_dict['data']['JSProgram']
-        except Exception:
-            return {}, 400
 
+        except Exception:
+            response = {
+                "message": "Malformed Request. Error getting values from request body."
+            }
+            return response, 400
+
+        # Set variables to "". They will get overwritten if the request_body has the values.
+        package_url = ""
+        package_content = ""
+
+        # Check the "Content" field
+        try:
+            package_content = data_dict['data']['Content']
+        
+        except Exception: # if try fails --> No "Content" field --> Ingestion
+            # For Ingestion, the "URL" field is in request_body
+            package_url = data_dict['data']['URL']
+
+            # Check the rating scores.
+            # IF: any scores < 0.5
+            # THEN: don't upload the package
+            
+            # Calculate scores
+            scores = compute_package_scores(package_url)
+            # print_to_stdout(scores)
+            valid_scores = ( (float(scores['RAMP_UP_SCORE']) >= 0.5)
+                                & (float(scores['CORRECTNESS_SCORE']) >= 0.5)
+                                & (float(scores['BUS_FACTOR_SCORE']) >= 0.5)
+                                & (float(scores['RESPONSIVE_MAINTAINER_SCORE']) >= 0.5)
+                                & (float(scores['LICENSE_SCORE']) >= 0.5)
+                                & (float(scores['GOOD_PINNING_PRACTICE_SCORE']) >= 0.5)
+                            )
+            if not( valid_scores ): # if: 1 or more of the scores are <0.5 --> Don't upload the package
+                response = {
+                    "message": "1 or more Rating Scores <0.5. Unable to Upload."
+                }
+                return response, 400
+            # else: all the Scores are >=0.5! Yay, continue to upload/create the package.
+        
 
         # Check to see if the package already exists in the registry
         query = datastore_client.query(kind='package')
@@ -54,7 +100,7 @@ class CreatePackage(Resource):
 
         if len(results):
             response = {
-                "message": "A package with that Name and Version already exists in the datastore."
+                "message": "Package with that Name and Version already exists in the datastore."
             }
             return response, 403
 
@@ -100,6 +146,61 @@ class CreatePackage(Resource):
         package_entity['Events'] = []
 
         # Calculate scores
+        if (package_url == ""): # if the package_url is empty (""), then we have to use the "Content" field to get the package_url
+            # base64 Content-string --> Zip File ('decoded_content.zip')
+            try:
+                decoded_bytes = base64.b64decode(package_content)
+                file_decoded = open('decoded_content.zip', 'wb') # open a new empty file, to write to
+                file_decoded.write(decoded_bytes)
+                file_decoded.close()
+            except Exception:
+                response = {
+                    "message": "Error decoding the Content-string in the request body."
+                }
+                return response, 400
+
+            # Zip File ('decoded_content.zip') --> Get the "package.json" from it
+            try: 
+                names = []
+                with ZipFile('decoded_content.zip', 'r') as zipObj:
+                    for info in zipObj.infolist():
+                        if (info.is_dir()):
+                            if "_" not in (info.filename):
+                                names.append(info.filename) # only want the folder that holds the package.json
+                    # print_to_stdout(names)
+                    
+                    # Copy the file from the Zipfile --> Save it to our current directory
+                    source = zipObj.open(names[0]+"package.json")
+                    target = open("package.json", "wb")
+                    with source, target:
+                        shutil.copyfileobj(source, target)
+            except Exception:
+                # Add entity to the registry. Without updating the scores from "-1"
+                datastore_client.put(package_entity)                
+                response = {
+                    'Name': package_name,
+                    'Version': package_version,
+                    'ID': package_id,
+                    "message": "Rating Feaure will not be available for this package, since it does not contain a package.json in the zipfile provided in the CONTENT-field of the request body."
+                }
+                return response, 400
+                
+            # "package.json" --> get the URL
+            try:
+                with open("package.json") as json_file:
+                    data = json.load(json_file) # data holds everything
+                    url = data['repository']['url']
+                    package_url = url[4:] # trim the "git+" off the URL
+                    # print_to_stdout(package_url)
+            except Exception:
+                response = {
+                    "message": "Error getting the URL from the package.json."
+                }
+                return response, 400
+
+        # If we make it here, then we successfully got the package_url !!
+        # YAY. continue on with business as usual:
+           
         scores = compute_package_scores(package_url)
         # If we choked at computing a metric, we scores dict would be empty
         if scores:
@@ -109,6 +210,7 @@ class CreatePackage(Resource):
             package_entity['ResponsiveMaintainer'] = scores['RESPONSIVE_MAINTAINER_SCORE']
             package_entity['LicenseScore'] = scores['LICENSE_SCORE']
             package_entity['GoodPinningPractice'] = scores['GOOD_PINNING_PRACTICE_SCORE']
+            # TODO: why is there no "NET SCORE" value ??
 
         # Add entity to the registry
         datastore_client.put(package_entity)
