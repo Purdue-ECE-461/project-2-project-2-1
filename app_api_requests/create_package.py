@@ -15,8 +15,9 @@ from zipfile import ZipFile
 import os
 import shutil
 
+from git import Repo
 
- 
+
 def print_to_stdout(*a):
     print(*a, file = sys.stdout)
 
@@ -24,13 +25,13 @@ class CreatePackage(Resource):
     def post(self):
         request.get_data()
         datastore_client = get_datastore_client()
+        # datastore_client = datastore.Client()
         
         # User Authentication:
         auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
         token = auth_header.split()[1] # token = "[token]"
         
         # If token is in the database --> valid user
-        
         query = datastore_client.query(kind='user')
         query.add_filter("bearerToken", "=", token)
         results = list(query.fetch())
@@ -134,8 +135,12 @@ class CreatePackage(Resource):
         package_entity['Name'] = package_name
         package_entity['Version'] = package_version
         package_entity['ID'] = package_id
-        package_entity['Content'] = package_content
-        package_entity['URL'] = package_url
+
+        # If Ingestion: URL is given, but Content is ""
+        # If Creation: Content is given, but URL is ""
+        package_entity['Content'] = package_content # Content is updated from "" to an actual value --> later in the code
+        package_entity['URL'] = package_url # URL is updated from "" to an actual value --> later in the code
+
         package_entity['JSProgram'] = package_js_program
         package_entity['RampUp'] = -1
         package_entity['Correctness'] = -1
@@ -146,6 +151,8 @@ class CreatePackage(Resource):
         package_entity['Events'] = []
 
         # Calculate scores
+
+        # If Creation: Content is given, but URL is ""
         if (package_url == ""): # if the package_url is empty (""), then we have to use the "Content" field to get the package_url
             # base64 Content-string --> Zip File ('decoded_content.zip')
             try:
@@ -178,29 +185,46 @@ class CreatePackage(Resource):
                 # Add entity to the registry. Without updating the scores from "-1"
                 datastore_client.put(package_entity)                
                 response = {
-                    'Name': package_name,
-                    'Version': package_version,
-                    'ID': package_id,
                     "message": "Rating Feaure will not be available for this package, since it does not contain a package.json in the zipfile provided in the CONTENT-field of the request body."
                 }
-                return response, 400
+                return response, 200
                 
             # "package.json" --> get the URL
             try:
                 with open("package.json") as json_file:
                     data = json.load(json_file) # data holds everything
                     url = data['repository']['url']
-                    package_url = url[4:] # trim the "git+" off the URL
+                    package_url = url[4:] # trim the "git+" off the start of the URL
+                    size = len(package_url)
+                    package_url = package_url[:size - 4] # trim the ".git" off the end of the URL
+                    package_entity['URL'] = package_url
                     # print_to_stdout(package_url)
             except Exception:
                 response = {
                     "message": "Error getting the URL from the package.json."
                 }
                 return response, 400
-
         # If we make it here, then we successfully got the package_url !!
         # YAY. continue on with business as usual:
-           
+        
+        # If Ingestion: URL is given, but Content is ""
+        else: # the package_content is empty (""). So we have to use the "URL" field to clone repo, zip the folder, encode in base64, add to entity's Content field
+            # Use the "URL" field to clone repo
+            repo_name = package_url.split('.git')[0].split('/')[-1]
+            Repo.clone_from(package_url, repo_name)
+
+            # Get the folder with repository --> zip file
+            shutil.make_archive(repo_name, 'zip') #  base_name="/")
+
+            # Encode the zipfule in base64
+            with open(repo_name+".zip", "rb") as f:
+                bytes = f.read()
+                encode_string = base64.b64encode(bytes)
+
+            # Add the encoded string to entity's Content field
+            package_entity['Content'] = encode_string
+            # print_to_stdout(encode_string)
+
         scores = compute_package_scores(package_url)
         # If we choked at computing a metric, we scores dict would be empty
         if scores:
