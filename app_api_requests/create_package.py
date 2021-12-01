@@ -4,31 +4,33 @@ from flask_restful import Resource
 from flask import request
 
 import json
+import os
 
 from app_api_requests.package_ingestion import compute_package_scores
+from app_api_requests.datastore_client_factory import get_datastore_client
 
 class CreatePackage(Resource):
     def post(self):
         request.get_data()
+        datastore_client = get_datastore_client()
         
         # User Authentication:
         auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
         token = auth_header.split()[1] # token = "[token]"
         
         # If token is in the database --> valid user
-        datastore_client = datastore.Client()
+        
         query = datastore_client.query(kind='user')
         query.add_filter("bearerToken", "=", token)
         results = list(query.fetch())
 
         if len(results) == 0: # The token is NOT in the database --> Invalid user
             response = {
-                'message': "Unauthorized user. Bearer Token is not in the datastore."
+                'message': "Unauthorized user. Bearer Token is not in the datastore.",
             }
             return response, 400
         # else, the user is in the database. Carry on.
     
-
         decoded_data = request.data.decode("utf-8")
         data_dict = json.loads(decoded_data)
         
