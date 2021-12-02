@@ -76,7 +76,7 @@ class CreatePackage(Resource):
             
             # Calculate scores
             scores = compute_package_scores(package_url)
-            # print_to_stdout(scores)
+            print_to_stdout(scores)
             valid_scores = ( (float(scores["RAMP_UP_SCORE"]) >= 0.5)
                                 & (float(scores['CORRECTNESS_SCORE']) >= 0.5)
                                 & (float(scores['BUS_FACTOR_SCORE']) >= 0.5)

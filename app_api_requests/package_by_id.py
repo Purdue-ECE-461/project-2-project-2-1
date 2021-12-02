@@ -99,46 +99,7 @@ class PackageById(Resource): # also why is this a POST request
         key = datastore_client.key('package', input_id)
         original_package = datastore_client.get(key)
         package_entity = datastore.Entity(key, exclude_from_indexes=["Content"])
-        # what does " exclude_from_indexes=["Content"] " do ?
         
-        if (new_package_content == ""):
-            try:
-                # We need to use the new_package_url --> to get the encoded-base64-content string
-                # Use the "URL" field to clone repo
-                repo_name = new_package_url.split('.git')[0].split('/')[-1]
-                Repo.clone_from(new_package_url, repo_name) # creates a FOLDER of the cloned repo
-
-                # Get the folder with repository --> zip file
-                shutil.make_archive(repo_name, 'zip')  # creates a ZIPFILE of the repo
-
-                # Encode the zipfule in base64
-                with open(repo_name+".zip", "rb") as f:
-                    bytes = f.read()
-                    encode_string = base64.b64encode(bytes)
-
-                # Add the encoded string to entity's Content field
-                new_package_content = encode_string
-                # print_to_stdout(encode_string)
-
-                # Delete the Repo FOLDER (that we just created) from our current directory
-                # Delete the Repo.zip (that we just created) from our current directory
-                try:
-                    os.remove(repo_name+".zip") # removes a file.
-                    shutil.rmtree(repo_name) # deletes a directory/folder and all its contents.
-                except Exception:
-                    response = {
-                        "message": "Error removing the repo folder and repo.zip, after computing the Content-encoded string."
-                    }
-                    return response, 400
-
-            except Exception:
-                response = {
-                    "message": "Error computing and encoding the Content string."
-                }
-                return response, 400
-            
-
-
         # Update properties: https://cloud.google.com/datastore/docs/concepts/entities#properties_and_value_types
         package_entity.update(
             {
@@ -220,6 +181,49 @@ class PackageById(Resource): # also why is this a POST request
         # Only getting a package
         # package_entity = datastore.Entity(key, exclude_from_indexes=["Content"])
         # what is " exclude_from_indexes=["Content"] " for ?
+        package_url = package_to_return["URL"] # this field will never be empty when we retrieve from the datastore
+        package_content = package_to_return["Content"] # this field will never be empty when we retrieve from the datastore
+
+        if (package_content == ""): # if the Content field is empty
+            try:
+                # We need to use the new_package_url --> to get the encoded-base64-content string
+                # Use the "URL" field to clone repo
+                repo_name = package_url.split('.git')[0].split('/')[-1]
+                Repo.clone_from(package_url, repo_name) # creates a FOLDER of the cloned repo
+
+                # Get the folder with repository --> zip file
+                shutil.make_archive(repo_name, 'zip')  # creates a ZIPFILE of the repo
+
+                # Encode the zipfile in base64
+                zip_file = repo_name +".zip"
+                with open(zip_file, "rb") as f:
+                    bytes = f.read()
+                    encode_string = base64.b64encode(bytes)
+                    encode_string = encode_string.decode('utf-8')
+
+                # Add the encoded string to entity's Content field
+                package_content = encode_string
+                # print_to_stdout(encode_string)
+
+                # Delete the Repo FOLDER (that we just created) from our current directory
+                # Delete the Repo.zip (that we just created) from our current directory
+                try:
+                    os.remove(zip_file) # removes a file.
+                    shutil.rmtree(repo_name) # deletes a directory/folder and all its contents.
+                except Exception:
+                    response = {
+                        "message": "Error removing the repo folder and repo.zip, after computing the Content-encoded string."
+                    }
+                    return response, 400
+
+            except Exception:
+                response = {
+                    "message": "Error computing and encoding the Content string."
+                }
+                return response, 400
+        
+        # yay, by this point the Content-field forsure has an encoded string.
+        # not stored in the database tho
 
         # try-catch here to be safe
         try:
@@ -230,7 +234,7 @@ class PackageById(Resource): # also why is this a POST request
                     "ID": package_to_return["ID"]
                 },
                 "data": {
-                    "Content": package_to_return["Content"],
+                    "Content": package_content,
                     "URL": package_to_return["URL"],
                     "JSProgram": package_to_return["JSProgram"]
                 }
@@ -242,8 +246,7 @@ class PackageById(Resource): # also why is this a POST request
                 "description": "The specified ID has null/missing fields in the datastore"
             }
             return response, 500
-
-    
+        
         # Return response body and code
         return response, 200
 
