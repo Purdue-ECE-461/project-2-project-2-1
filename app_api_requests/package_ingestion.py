@@ -18,4 +18,11 @@ def compute_package_scores(package_url):
         print(all_scores)
         return list(all_scores.values())[0]
     except Exception:
-        return {}
+        return {
+                'RAMP_UP_SCORE': -1,
+                'CORRECTNESS_SCORE': -1,
+                'BUS_FACTOR_SCORE': -1,
+                'RESPONSIVE_MAINTAINER_SCORE': -1,
+                'LICENSE_SCORE': -1,
+                'GOOD_PINNING_PRACTICE_SCORE': -1
+                }

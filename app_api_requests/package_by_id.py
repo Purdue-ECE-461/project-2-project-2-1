@@ -5,6 +5,13 @@ from flask import request
 
 import json
 import sys
+import base64
+
+from zipfile import ZipFile
+import os
+import shutil
+
+from git import Repo
  
  
 def print_to_stdout(*a):
@@ -46,7 +53,7 @@ class PackageById(Resource): # also why is this a POST request
             new_package_version = request_body['metadata']['Version']
             new_package_id = request_body['metadata']['ID'] # should be the same ID
 
-            new_package_content = request_body['data']['Content']
+            new_package_content = request_body['data']['Content'] # THIS FIELD MAY BE BLANK, == ""
             new_package_url = request_body['data']['URL']
             new_package_js_program = request_body['data']['JSProgram']
 
@@ -94,6 +101,44 @@ class PackageById(Resource): # also why is this a POST request
         package_entity = datastore.Entity(key, exclude_from_indexes=["Content"])
         # what does " exclude_from_indexes=["Content"] " do ?
         
+        if (new_package_content == ""):
+            try:
+                # We need to use the new_package_url --> to get the encoded-base64-content string
+                # Use the "URL" field to clone repo
+                repo_name = new_package_url.split('.git')[0].split('/')[-1]
+                Repo.clone_from(new_package_url, repo_name) # creates a FOLDER of the cloned repo
+
+                # Get the folder with repository --> zip file
+                shutil.make_archive(repo_name, 'zip')  # creates a ZIPFILE of the repo
+
+                # Encode the zipfule in base64
+                with open(repo_name+".zip", "rb") as f:
+                    bytes = f.read()
+                    encode_string = base64.b64encode(bytes)
+
+                # Add the encoded string to entity's Content field
+                new_package_content = encode_string
+                # print_to_stdout(encode_string)
+
+                # Delete the Repo FOLDER (that we just created) from our current directory
+                # Delete the Repo.zip (that we just created) from our current directory
+                try:
+                    os.remove(repo_name+".zip") # removes a file.
+                    shutil.rmtree(repo_name) # deletes a directory/folder and all its contents.
+                except Exception:
+                    response = {
+                        "message": "Error removing the repo folder and repo.zip, after computing the Content-encoded string."
+                    }
+                    return response, 400
+
+            except Exception:
+                response = {
+                    "message": "Error computing and encoding the Content string."
+                }
+                return response, 400
+            
+
+
         # Update properties: https://cloud.google.com/datastore/docs/concepts/entities#properties_and_value_types
         package_entity.update(
             {
