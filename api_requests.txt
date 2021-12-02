@@ -127,7 +127,6 @@ curl --location --request POST 'http://127.0.0.1:8080/package' \
 	}
 }'
 -----------
-
 Package Update By ID :
 ** Make sure to UPLOAD a package to the datastore, before you try to UPDATE the package.
 
