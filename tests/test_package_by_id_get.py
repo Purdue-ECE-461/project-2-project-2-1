@@ -107,7 +107,7 @@ def test_package_by_id_get_creation():
     assert package_entity['URL'] == 'https://github.com/freeCodeCamp/freeCodeCamp'
 
 
-# GET by ID: "500: Internal Server Error." (ID provided isn’t in Datastore)
+# GET by ID: "500: Internal Server Error." (ID provided isn’t in Datastore --> No such package)
 def test_get_package_FAIL500():
     client = get_datastore_client()
     clear_registry() # Clear the Registry
