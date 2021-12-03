@@ -66,7 +66,8 @@ class Authenticate(Resource):
             }
             return response, 401
 
-        # BELOW, I create a new user ... but I think it should return an error here.
+        # BELOW, I create a new user ... but I would need to make another path ".../register".
+        # only if time warrants
         """
             # The kind for the new entity
             kind = "user"

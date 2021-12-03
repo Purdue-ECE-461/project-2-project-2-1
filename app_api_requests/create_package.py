@@ -23,8 +23,7 @@ def print_to_stdout(*a):
 class CreatePackage(Resource):
     def post(self):
         request.get_data()
-        # datastore_client = get_datastore_client()
-        datastore_client = datastore.Client()
+        datastore_client = get_datastore_client()
         
         # User Authentication:
         auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
