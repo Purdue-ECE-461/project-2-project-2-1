@@ -7,6 +7,8 @@ import json
 import sys
 import base64
 
+from app_api_requests.datastore_client_factory import get_datastore_client
+
 from zipfile import ZipFile
 import os
 import shutil
@@ -29,7 +31,8 @@ class PackageById(Resource): # also why is this a POST request
         token = auth_header.split()[1] # token = "[token]"
         
         # If token is in the database --> valid user
-        datastore_client = datastore.Client()
+        # datastore_client = datastore.Client()
+        datastore_client = get_datastore_client()
         query = datastore_client.query(kind='user')
         query.add_filter("bearerToken", "=", token)
         results = list(query.fetch())
@@ -142,10 +145,24 @@ class PackageById(Resource): # also why is this a POST request
         # Simply GETS info based on the ID --> and Returns the Response JSON
         request.get_data() # Get everything from the request/URL (path params)
 
-        auth_header = request.headers.get('X-Authorization')
-        if auth_header is None:
-            return {}, 400
-        # TODO: add authorization here in the future
+        # User Authentication:
+        auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
+        token = auth_header.split()[1] # token = "[token]"
+        
+        # If token is in the database --> valid user
+        # datastore_client = datastore.Client()
+        datastore_client = get_datastore_client()
+        query = datastore_client.query(kind='user')
+        query.add_filter("bearerToken", "=", token)
+        results = list(query.fetch())
+
+        if len(results) == 0: # The token is NOT in the database --> Invalid user
+            response = {
+                "code": -1,
+                'message': "Unauthorized user. Bearer Token is not in the datastore."
+            }
+            return response, 500
+        # else, the user is in the database. Carry on.
         
         # Get the inputted "id" from the URL path
         input_id = request.view_args['id']
@@ -189,10 +206,13 @@ class PackageById(Resource): # also why is this a POST request
                 # We need to use the new_package_url --> to get the encoded-base64-content string
                 # Use the "URL" field to clone repo
                 repo_name = package_url.split('.git')[0].split('/')[-1]
-                Repo.clone_from(package_url, repo_name) # creates a FOLDER of the cloned repo
+                # print_to_stdout(repo_name)
+                if not( os.path.isdir(repo_name) ): # if it's NOT in the current directory already
+                    Repo.clone_from(package_url, repo_name) # creates a FOLDER of the cloned repo
 
                 # Get the folder with repository --> zip file
-                shutil.make_archive(repo_name, 'zip')  # creates a ZIPFILE of the repo
+                if not(os.path.isfile(repo_name+".zip")): # if it's NOT in the current directory already
+                    shutil.make_archive(repo_name, 'zip')  # creates a ZIPFILE of the repo
 
                 # Encode the zipfile in base64
                 zip_file = repo_name +".zip"
@@ -212,15 +232,22 @@ class PackageById(Resource): # also why is this a POST request
                     shutil.rmtree(repo_name) # deletes a directory/folder and all its contents.
                 except Exception:
                     response = {
+                        "code": -1,
                         "message": "Error removing the repo folder and repo.zip, after computing the Content-encoded string."
                     }
-                    return response, 400
+                    return response, 500
 
             except Exception:
                 response = {
+                    "code": -1,
                     "message": "Error computing and encoding the Content string."
                 }
-                return response, 400
+                try:
+                    os.remove(zip_file) # removes a file.
+                    shutil.rmtree(repo_name) # deletes a directory/folder and all its contents.
+                except Exception: 
+                    return response, 500 # if file and folder are already deleted it'll go here, all good.
+                return response, 500
         
         # yay, by this point the Content-field forsure has an encoded string.
         # not stored in the database tho
@@ -245,18 +272,42 @@ class PackageById(Resource): # also why is this a POST request
                 "message": "An error occurred while retrieving package",
                 "description": "The specified ID has null/missing fields in the datastore"
             }
+            try:
+                os.remove(zip_file) # removes a file.
+                shutil.rmtree(repo_name) # deletes a directory/folder and all its contents.
+            except Exception:
+                return response, 500 # if file and folder are already deleted it'll go here, all good.
             return response, 500
         
         # Return response body and code
+        try:
+            os.remove(zip_file) # removes a file.
+            shutil.rmtree(repo_name) # deletes a directory/folder and all its contents.
+        except Exception:
+            return response, 200 # if file and folder are already deleted it'll go here, all good.
+
         return response, 200
 
     def delete(self, id): # DELETE PAckage
         request.get_data() # Get everything from the request/URL (path params)
 
-        auth_header = request.headers.get('X-Authorization')
-        if auth_header is None:
-            return {}, 400
-        # TODO: add authorization here in the future
+        # User Authentication:
+        auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
+        token = auth_header.split()[1] # token = "[token]"
+        
+        # If token is in the database --> valid user
+        # datastore_client = datastore.Client()
+        datastore_client = get_datastore_client()
+        query = datastore_client.query(kind='user')
+        query.add_filter("bearerToken", "=", token)
+        results = list(query.fetch())
+
+        if len(results) == 0: # The token is NOT in the database --> Invalid user
+            response = {
+                'message': "Unauthorized user. Bearer Token is not in the datastore."
+            }
+            return response, 400
+        # else, the user is in the database. Carry on.
         
         # Get the inputted "id" from the URL path
         input_id = request.view_args['id']
@@ -289,4 +340,4 @@ class PackageById(Resource): # also why is this a POST request
         }
 
         # Return no response body and the code
-        return 200        
+        return 200
