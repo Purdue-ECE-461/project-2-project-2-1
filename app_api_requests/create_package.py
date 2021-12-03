@@ -4,12 +4,11 @@ from flask_restful import Resource
 from flask import request
 
 import json
+import sys
 import base64
 
 from app_api_requests.package_ingestion import compute_package_scores
 from app_api_requests.datastore_client_factory import get_datastore_client
-
-import sys
 
 from zipfile import ZipFile
 import os
@@ -24,8 +23,8 @@ def print_to_stdout(*a):
 class CreatePackage(Resource):
     def post(self):
         request.get_data()
-        datastore_client = get_datastore_client()
-        # datastore_client = datastore.Client()
+        # datastore_client = get_datastore_client()
+        datastore_client = datastore.Client()
         
         # User Authentication:
         auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
@@ -77,8 +76,8 @@ class CreatePackage(Resource):
             
             # Calculate scores
             scores = compute_package_scores(package_url)
-            # print_to_stdout(scores)
-            valid_scores = ( (float(scores['RAMP_UP_SCORE']) >= 0.5)
+            print_to_stdout(scores)
+            valid_scores = ( (float(scores["RAMP_UP_SCORE"]) >= 0.5)
                                 & (float(scores['CORRECTNESS_SCORE']) >= 0.5)
                                 & (float(scores['BUS_FACTOR_SCORE']) >= 0.5)
                                 & (float(scores['RESPONSIVE_MAINTAINER_SCORE']) >= 0.5)
@@ -185,9 +184,15 @@ class CreatePackage(Resource):
                 # Add entity to the registry. Without updating the scores from "-1"
                 datastore_client.put(package_entity)                
                 response = {
+                    'Name': package_name,
+                    'Version': package_version,
+                    'ID': package_id,
                     "message": "Rating Feaure will not be available for this package, since it does not contain a package.json in the zipfile provided in the CONTENT-field of the request body."
                 }
-                return response, 200
+                # Delete the "decoded_content.zip" file and "package.json" from our current directory.
+                # Everything was successful, we don't need it. 
+                os.remove("decoded_content.zip") # removes a file.
+                return response, 201
                 
             # "package.json" --> get the URL
             try:
@@ -199,15 +204,26 @@ class CreatePackage(Resource):
                     package_url = package_url[:size - 4] # trim the ".git" off the end of the URL
                     package_entity['URL'] = package_url
                     # print_to_stdout(package_url)
+
+                    # Delete the "decoded_content.zip" file and "package.json" from our current directory.
+                    # Everything was successful, we don't need it. 
+                    os.remove("package.json") # removes a file.
+                    os.remove("decoded_content.zip") # removes a file.
+
             except Exception:
                 response = {
                     "message": "Error getting the URL from the package.json."
                 }
                 return response, 400
+            
         # If we make it here, then we successfully got the package_url !!
         # YAY. continue on with business as usual:
         
         # If Ingestion: URL is given, but Content is ""
+        """ 
+        Leave the "Content" field blank, == ""
+        When the user requests a Package_By_ID, compute the base64 encoded Content-string, and return it in response
+        But DO NOT actualy STORE the encoded-content string
         else: # the package_content is empty (""). So we have to use the "URL" field to clone repo, zip the folder, encode in base64, add to entity's Content field
             # Use the "URL" field to clone repo
             repo_name = package_url.split('.git')[0].split('/')[-1]
@@ -224,7 +240,7 @@ class CreatePackage(Resource):
             # Add the encoded string to entity's Content field
             package_entity['Content'] = encode_string
             # print_to_stdout(encode_string)
-
+        """
         scores = compute_package_scores(package_url)
         # If we choked at computing a metric, we scores dict would be empty
         if scores:

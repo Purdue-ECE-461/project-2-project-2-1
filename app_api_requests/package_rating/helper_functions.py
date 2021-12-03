@@ -10,8 +10,13 @@ def normalize_metric(raw_score, max_score):
 repo_clone_folder = "/tmp/repo_clone"
 def clone_repo(url, log):
     # Clone repo to local folder
+    # if: it exsts -- > remove it
+    if ( os.path.isdir(repo_clone_folder) ):
+        shutil.rmtree(repo_clone_folder)
+    
     log.info("Cloning repo " + url + " to local folder " + repo_clone_folder)
     os.system("git clone " + url + " " + repo_clone_folder)
+    
     return repo_clone_folder
 
 def remove_repo(repo_path, log):
