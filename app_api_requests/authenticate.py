@@ -1,4 +1,4 @@
-from google.cloud import datastore
+from app_api_requests.datastore_client_factory import get_datastore_client
 
 from flask_restful import Resource
 from flask import request
@@ -28,7 +28,7 @@ class Authenticate(Resource):
             }
             return response, 401
 
-        datastore_client = datastore.Client()
+        datastore_client = get_datastore_client()
 
         # Check to see if the User already exists in the registry
         query = datastore_client.query(kind='user') # LOWERCASE "user"

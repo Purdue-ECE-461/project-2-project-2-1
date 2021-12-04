@@ -1,9 +1,9 @@
-from google.cloud import datastore
-
+from app_api_requests.datastore_client_factory import get_datastore_client
 from flask_restful import Resource
 from flask import request
 
 import json
+
 
 class RatePackage(Resource):
     def get(self, id):
@@ -14,7 +14,7 @@ class RatePackage(Resource):
         token = auth_header.split()[1] # token = "[token]"
         
         # If token is in the database --> valid user
-        datastore_client = datastore.Client()
+        datastore_client = get_datastore_client()
         query = datastore_client.query(kind='user')
         query.add_filter("bearerToken", "=", token)
         results = list(query.fetch())
