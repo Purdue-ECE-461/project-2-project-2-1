@@ -234,3 +234,35 @@ curl --location --request PUT 'http://127.0.0.1:8080/authenticate' \
         "password": "correcthorsebatterystaple123(!__+@**(A"
     }
 }'
+
+-----------
+
+REGISTER a user:
+* The user uploading a user needs to be 
+(a) authenticated
+(b) isAdmin == True
+
+curl -i --location --request PUT 'http://127.0.0.1:8080/register/ece461defaultadminuser' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+--data-raw '{
+    "User": {
+        "name": "newUser",
+        "isAdmin": true
+    },
+    "Secret": {
+        "password": "newUserPassword"
+    }
+}'
+
+curl -i --location --request PUT 'http://127.0.0.1:8080/register/ece461defaultadminuser' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
+--data-raw '{
+    "User": {
+        "name": "newUser",
+        "isAdmin": true
+    },
+    "Secret": {
+        "password": "newUserPassword"
+    }
+}'
+

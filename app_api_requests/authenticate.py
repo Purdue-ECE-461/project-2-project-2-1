@@ -1,3 +1,4 @@
+from google.cloud import datastore
 from app_api_requests.datastore_client_factory import get_datastore_client
 
 from flask_restful import Resource
