@@ -75,14 +75,25 @@ def fetch_times(limit):
 
 @app.route('/')
 def root():
+    # add the default user to the datastore
+    # setting the key
+    user_entity = datastore.Entity(key=datastore_client.key('user'))
+    # setting properties
+    user_entity.update({
+        "name": "ece461defaultadminuser",
+        "isAdmin": True,
+        "password": "correcthorsebatterystaple123(!__+@**(A",
+        "bearerToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+    })
+
     # Store the current access time in Datastore.
-    store_time(datetime.datetime.now())
+    # store_time(datetime.datetime.now())
 
     # Fetch the most recent 10 access times from Datastore.
-    times = fetch_times(10)
+    # times = fetch_times(10)
 
     # this return stmt: DISPLAYS the gotten info to the site's screen. (we don't need to show anything for the project2)
-    return render_template('index.html', times=times)
+    # return render_template('index.html', times=times)
 
 
 api.add_resource(CreatePackage, '/package', endpoint='/package')
