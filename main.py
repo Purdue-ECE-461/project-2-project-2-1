@@ -85,28 +85,22 @@ def root():
     # this return stmt: DISPLAYS the gotten info to the site's screen. (we don't need to show anything for the project2)
     return render_template('index.html', times=times)
 
-# Instantiates a client
+# Instantiates a logging client, setup will reroute python logs to GCP
 client = google.cloud.logging.Client()
-
-# Retrieves a Cloud Logging handler based on the environment
-# you're running in and integrates the handler with the
-# Python logging module. By default this captures all logs
-# at INFO level and higher
 client.setup_logging()
-
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
     datefmt='%Y-%m-%d:%H:%M:%S')
+logger = logging.getLogger(__name__)
 
-logging.info('Adding API resources to application...')
 
+logger.info('Adding API resources to application...')
 api.add_resource(CreatePackage, '/package', endpoint='/package')
 api.add_resource(PackageById, '/package/<string:id>')
 api.add_resource(RatePackage, '/package/<string:id>/rate', endpoint='/package_rate')
 api.add_resource(Reset, '/reset', endpoint='/reset')
 api.add_resource(Authenticate, '/authenticate')
+logger.info('Resources added, app is running')
 
-
-logging.info('Resources added, app is running')
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
     # Engine, a webserver process such as Gunicorn will serve the app. This
