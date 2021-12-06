@@ -3,6 +3,8 @@ from google.cloud import datastore
 from flask_restful import Resource
 from flask import request
 
+from app_api_requests.datastore_client_factory import get_datastore_client
+
 import google.cloud.logging
 import logging
 
@@ -24,10 +26,11 @@ class Reset(Resource):
         logger.info('Token: ' + token)
         
         # If token is in the database --> valid user
-        datastore_client = datastore.Client()
+        datastore_client = get_datastore_client()
         query = datastore_client.query(kind='user')
         query.add_filter("bearerToken", "=", token)
         results = list(query.fetch())
+        logger.info('Number of users with matching tokens: ' + str(len(results)))
 
         if len(results) == 0: # The token is NOT in the database --> Invalid user
             logger.error('Token: ' + token + ' does not match any registered users.')
