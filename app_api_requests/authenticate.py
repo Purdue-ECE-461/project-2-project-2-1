@@ -6,7 +6,6 @@ from flask import request
 import sys
 
 import json
-from uuid import uuid4
 
 def print_to_stdout(*a):
     print(*a, file = sys.stdout)
@@ -66,32 +65,3 @@ class Authenticate(Resource):
                 "message": "Invalid User. Username is not in the Datastore."
             }
             return response, 401
-
-        # BELOW, I create a new user ... but I would need to make another path ".../register".
-        # only if time warrants
-        """
-            # The kind for the new entity
-            kind = "user"
-
-            # The name/ID for the new entity
-            name = input_name # Use the "username" for the "name/ID"/Identifier of the Entity
-
-            # The Cloud Datastore key for the new entity
-            user_key = datastore_client.key(kind, name)
-
-            # Prepares the new entity
-            new_user = datastore.Entity(key=user_key)
-            new_user["name"] = input_name
-            new_user["isAdmin"] = input_isAdmin
-            new_user["password"] = input_password
-            token = uuid4() # generates a random auth bearer token
-            # print_to_stdout("Bearer Token: " + token)
-            new_user["bearerToken"] = token
-
-            # Saves the entity
-            datastore_client.put(task)
-            
-            response =  ("bearer " + token)
-            
-            return response, 200
-            """
