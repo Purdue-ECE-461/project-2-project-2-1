@@ -28,6 +28,8 @@ class Reset(Resource):
         # If token is in the database --> valid user
         datastore_client = get_datastore_client()
         query = datastore_client.query(kind='user')
+        results = list(query.fetch())
+        print()
         query.add_filter("bearerToken", "=", token)
         results = list(query.fetch())
         logger.info('Number of users with matching tokens: ' + str(len(results)))
