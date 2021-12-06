@@ -29,7 +29,8 @@ class Reset(Resource):
         datastore_client = get_datastore_client()
         query = datastore_client.query(kind='user')
         results = list(query.fetch())
-        print()
+        logger.info('Number of users: ' + str(len(results)))
+        
         query.add_filter("bearerToken", "=", token)
         results = list(query.fetch())
         logger.info('Number of users with matching tokens: ' + str(len(results)))
