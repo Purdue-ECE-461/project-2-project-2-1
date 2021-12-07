@@ -30,9 +30,8 @@ def test_ingest_package_post_REPO1():
     assert response['Version'] == '4.17.1'
     assert response['ID'] == 'express'
 
-    query = client.query(kind='package')
-    query.add_filter("ID", "=", 'express')
-    package_entity = list(query.fetch())[0]
+    key = client.key('package', 'express')
+    package_entity = client.get(key)
 
     assert package_entity['Name'] == 'Express'
     assert package_entity['Version'] == '4.17.1'
@@ -67,9 +66,8 @@ def test_ingest_package_post_REPO4():
     assert response['Version'] == '4.3.3'
     assert response['ID'] == 'debug'
 
-    query = client.query(kind='package')
-    query.add_filter("ID", "=", 'debug')
-    package_entity = list(query.fetch())[0]
+    key = client.key('package', 'debug')
+    package_entity = client.get(key)
 
     assert package_entity['Name'] == 'Debug'
     assert package_entity['Version'] == '4.3.3'
@@ -104,9 +102,8 @@ def test_ingest_package_post_REPO5():
     assert response['Version'] == '6.0.1'
     assert response['ID'] == 'inversifyJS'
 
-    query = client.query(kind='package')
-    query.add_filter("ID", "=", 'inversifyJS')
-    package_entity = list(query.fetch())[0]
+    key = client.key('package', 'inversifyJS')
+    package_entity = client.get(key)
 
     assert package_entity['Name'] == 'InversifyJS'
     assert package_entity['Version'] == '6.0.1'
