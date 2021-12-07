@@ -37,9 +37,10 @@ def test_rate_package_normal():
     }
 
     response = requests.post('http://127.0.0.1:8080/package', headers=header, json=query)
-    assert response.status_code == 201
+    # assert response.status_code == 201
     response = response.json()
-    id = response['ID']
+    assert response['message'] == ''
+    # id = response['ID']
 
     response = requests.get('http://127.0.0.1:8080/package/' + id + '/rate', headers=header)
     assert response.status_code == 200
