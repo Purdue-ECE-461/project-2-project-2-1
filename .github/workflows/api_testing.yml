@@ -27,15 +27,15 @@ jobs:
           project_id: ${{ env.PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           
-      - name: Set up Python 3.7.3
+      - name: Set up Python 3.7.5
         uses: actions/setup-python@v2
         with:
-          python-version: "3.7.3"
+          python-version: "3.7.5"
           
       - name: Installing Dependencies
         run: |
           pip3 install --upgrade pip
-          pip install --upgrade setuptools 
+          pip install --upgrade setuptools
           pip install -r requirements.txt
 
 #       - name: Deploy to App Engine
