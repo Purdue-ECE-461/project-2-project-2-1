@@ -37,7 +37,7 @@ jobs:
           pip3 install --upgrade pip
           pip install --upgrade setuptools
           pip install -r requirements.txt
-          sudo apt-get install google-cloud-sdk-datastore-emulator
+          gcloud components install cloud-datastore-emulator
           
       - name: Running PyTest
         run: |
