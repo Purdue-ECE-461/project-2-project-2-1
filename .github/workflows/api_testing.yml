@@ -20,6 +20,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      
+      - name: Confirm Environment Variables
+        run: |
+          echo ${{ env.PROJECT_ID }}
 
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v0.2.0
