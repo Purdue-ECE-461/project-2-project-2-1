@@ -14,14 +14,6 @@ import os
 import shutil
 
 from git import Repo
-import google.cloud.logging
-import logging
-
-client = google.cloud.logging.Client()
-client.setup_logging()
-logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
-    datefmt='%Y-%m-%d:%H:%M:%S')
-logger = logging.getLogger(__name__)
  
  
 def print_to_stdout(*a):
@@ -32,14 +24,11 @@ def print_to_stdout(*a):
 class PackageById(Resource): # also why is this a POST request
     def put(self, id): # UPDATE package
         # print_to_stdout("PUT request went through")
-        logger.info('Executing PUT /package/:id endpoint...')
-        logger.info('Getting request data...')
         request.get_data() # Get everything from the request/URL (path params)
 
         # User Authentication:
         auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
         token = auth_header.split()[1] # token = "[token]"
-        logger.info('Token: ' + token)
         
         # If token is in the database --> valid user
         # datastore_client = datastore.Client()
@@ -47,10 +36,8 @@ class PackageById(Resource): # also why is this a POST request
         query = datastore_client.query(kind='user')
         query.add_filter("bearerToken", "=", token)
         results = list(query.fetch())
-        logger.info('Number of users with matching tokens: ' + str(len(results)))
 
         if len(results) == 0: # The token is NOT in the database --> Invalid user
-            logger.error('Token: ' + token + ' does not match any registered users.')
             response = {
                 'message': "Unauthorized user. Bearer Token is not in the datastore."
             }
@@ -59,10 +46,8 @@ class PackageById(Resource): # also why is this a POST request
      
         # Get the inputted "id" from the URL path
         input_id = request.view_args['id']
-        logger.info('Package ID from path: ' + str(input_id))
         
         # Get data from the request body
-        logger.info("Decoding json...")
         decoded_data = request.data.decode("utf-8") # Decode body of the data
         request_body = json.loads(decoded_data)
         
@@ -76,7 +61,6 @@ class PackageById(Resource): # also why is this a POST request
             new_package_js_program = request_body['data']['JSProgram']
 
         except Exception:
-            logger.error("Error getting values from request body.")
             response = {
                 "message": "Error getting values from request body."
             }
@@ -84,7 +68,6 @@ class PackageById(Resource): # also why is this a POST request
 
         # Check that the ID in the PATH matches the ID in the request body
         if (input_id != new_package_id):
-            logger.error("ID inputted in from URL path: "+str(input_id) +" Does not match ID in datastore/on record: "+ str(new_package_id) )
             response = {
                 "description": "Malformed request",
                 "message": "Inputted ID (in URL) does not match ID in request body."
@@ -102,14 +85,12 @@ class PackageById(Resource): # also why is this a POST request
 
         # Check to see if this Name+Version+ID combo actually does exists in the registry
         if (len(results) == 0 ): # This Combo doesn't exist
-            logger.error("No package in datastore with the name and version given: "+new_package_name+" , "+new_package_version)
             response = {
                 "description": "Malformed request (e.g. no such package).",
                 "message": "Package Name or Version does not the match with the Package ID."
             }
             return response, 400
         elif (len(results) >= 2 ): # Multiple matches. This should never happen.
-            logger.error("Multiple matches for the give name and version.")
             response = {
                 "description": "Datastore Error.",
                 "message": "Multiple matches for the given ID in the datastore."
@@ -123,38 +104,29 @@ class PackageById(Resource): # also why is this a POST request
         package_entity = datastore.Entity(key, exclude_from_indexes=["Content"])
         
         # Update properties: https://cloud.google.com/datastore/docs/concepts/entities#properties_and_value_types
-        logger.info("Updating package..." )
-        try:
-            package_entity.update(
-                {
-                    "Name" : original_package["Name"],
-                    "Version" : original_package["Version"],
-                    "ID" : original_package["ID"],
-                    
-                    # According to the .yaml instructions, only the "PackageData" (3 fields above) are changing/being updated.
-                    # All other fields (Name, Version, ID, Rating Scores, Event, etc) are the SAME
-                    # Thus, only those 3 fields are are specified in this update
-                    "Content" : new_package_content,
-                    "URL" : new_package_url,
-                    "JSProgram" : new_package_js_program,
-                    
-                    # Copying over the original values
-                    "RampUp" : original_package['RampUp'],
-                    "Correctness" : original_package['Correctness'],
-                    "BusFactor" : original_package['BusFactor'],
-                    "ResponsiveMaintainer" : original_package['ResponsiveMaintainer'],
-                    "LicenseScore" : original_package['LicenseScore'],
-                    "GoodPinningPractice" : original_package['GoodPinningPractice'],
-                    "Events" : original_package['Events']
-                }
-            )
-        except Exception:
-            logger.error("Exception thrown while updating package" )
-            response = {
-                'message': "Exception thrown while updating package"
+        package_entity.update(
+            {
+                "Name" : original_package["Name"],
+                "Version" : original_package["Version"],
+                "ID" : original_package["ID"],
+                
+                # According to the .yaml instructions, only the "PackageData" (3 fields above) are changing/being updated.
+                # All other fields (Name, Version, ID, Rating Scores, Event, etc) are the SAME
+                # Thus, only those 3 fields are are specified in this update
+                "Content" : new_package_content,
+                "URL" : new_package_url,
+                "JSProgram" : new_package_js_program,
+                
+                # Copying over the original values
+                "RampUp" : original_package['RampUp'],
+                "Correctness" : original_package['Correctness'],
+                "BusFactor" : original_package['BusFactor'],
+                "ResponsiveMaintainer" : original_package['ResponsiveMaintainer'],
+                "LicenseScore" : original_package['LicenseScore'],
+                "GoodPinningPractice" : original_package['GoodPinningPractice'],
+                "Events" : original_package['Events']
             }
-
-            return response, 200
+        )
 
         # Update entity in the registry
         datastore_client.put(package_entity)
@@ -164,11 +136,13 @@ class PackageById(Resource): # also why is this a POST request
         }
 
         # Return response body and code
-        return 200  
+        return 200    # jsonify{response}
 
     def get(self, id): # DOWNLOAD package
-        logger.info('Executing GET /package/:id endpoint...')
-        logger.info('Getting request data...')
+        # print_to_stdout("GET Request went through")
+        # This request has NO request body to utilize
+        # And DO NOT update the database
+        # Simply GETS info based on the ID --> and Returns the Response JSON
         request.get_data() # Get everything from the request/URL (path params)
 
         # User Authentication:
@@ -201,7 +175,6 @@ class PackageById(Resource): # also why is this a POST request
 
         # Check to see if the ID exists in the registry
         if (len(results) == 0 ): # This ID doesn't exist
-            logger.error("ID doesn't exist: "+ input_id)
             response = {
                 "code": -1,
                 "message": "An error occurred while retrieving package",
@@ -209,7 +182,6 @@ class PackageById(Resource): # also why is this a POST request
             }
             return response, 500
         elif (len(results) >= 2 ): # There are 2 IDs in the database. This should not happen ever.
-            logger.error("Multiple IDs match: "+ input_id)
             response = {
                 "code": -1,
                 "message": "An error occurred while retrieving package",
@@ -230,25 +202,19 @@ class PackageById(Resource): # also why is this a POST request
         package_content = package_to_return["Content"] # this field will never be empty when we retrieve from the datastore
 
         if (package_content == ""): # if the Content field is empty
-            logger.info("Content field is empty. Using the URL to zip the repo and get the content string to return to the user...")
             try:
                 # We need to use the new_package_url --> to get the encoded-base64-content string
                 # Use the "URL" field to clone repo
-                logger.info("Getting the repo_name from the package_url...")
                 repo_name = package_url.split('.git')[0].split('/')[-1]
-                logger.error("repo_name: "+ repo_name)
-
-                logger.info("Cloning repo...")
+                # print_to_stdout(repo_name)
                 if not( os.path.isdir(repo_name) ): # if it's NOT in the current directory already
                     Repo.clone_from(package_url, repo_name) # creates a FOLDER of the cloned repo
 
                 # Get the folder with repository --> zip file
-                logger.info("Zipping the folder with the repo...")
                 if not(os.path.isfile(repo_name+".zip")): # if it's NOT in the current directory already
                     shutil.make_archive(repo_name, 'zip')  # creates a ZIPFILE of the repo
 
                 # Encode the zipfile in base64
-                logger.error("Converting the zipfile to a base64 encoded string... (encoding zipfile)")
                 zip_file = repo_name +".zip"
                 with open(zip_file, "rb") as f:
                     bytes = f.read()
@@ -262,11 +228,9 @@ class PackageById(Resource): # also why is this a POST request
                 # Delete the Repo FOLDER (that we just created) from our current directory
                 # Delete the Repo.zip (that we just created) from our current directory
                 try:
-                    logger.info("Deleting the repo_folder and the zip-file of it from current directory...")
                     os.remove(zip_file) # removes a file.
                     shutil.rmtree(repo_name) # deletes a directory/folder and all its contents.
                 except Exception:
-                    logger.error("Error deleting the repo_folder and the zip-file of it from current directory...")
                     response = {
                         "code": -1,
                         "message": "Error removing the repo folder and repo.zip, after computing the Content-encoded string."
@@ -274,13 +238,11 @@ class PackageById(Resource): # also why is this a POST request
                     return response, 500
 
             except Exception:
-                logger.error("Error computing and encoding the Content string. ")
                 response = {
                     "code": -1,
                     "message": "Error computing and encoding the Content string."
                 }
                 try:
-                    logger.info("Deleting the repo_folder and the zip-file of it from current directory...")
                     os.remove(zip_file) # removes a file.
                     shutil.rmtree(repo_name) # deletes a directory/folder and all its contents.
                 except Exception: 
@@ -291,7 +253,6 @@ class PackageById(Resource): # also why is this a POST request
         # not stored in the database tho
 
         # try-catch here to be safe
-        logger.info("Forming response with the extracted data...")
         try:
             response = {
                 "metadata": {
@@ -306,7 +267,6 @@ class PackageById(Resource): # also why is this a POST request
                 }
             }
         except Exception:
-            logger.error("An error occurred while retrieving packag")
             response = {
                 "code": -1,
                 "message": "An error occurred while retrieving package",
@@ -329,8 +289,6 @@ class PackageById(Resource): # also why is this a POST request
         return response, 200
 
     def delete(self, id): # DELETE PAckage
-        logger.info('Executing DELETE /package/:id endpoint...')
-        logger.info('Getting request data...')
         request.get_data() # Get everything from the request/URL (path params)
 
         # User Authentication:
@@ -362,13 +320,11 @@ class PackageById(Resource): # also why is this a POST request
 
         # Check to see if the ID exists in the registry
         if (len(results) == 0 ): # This ID doesn't exist
-            logger.error("No such package in the datastore.")
             response = {
                 "message": "No such package.",
             }
             return response, 400
         elif (len(results) >= 2 ): # There are 2 IDs in the database. This should not happen ever.
-            logger.error("The inputted ID (wrongfully) appears multiple times in the datastore.")
             response = {
                 "message": "The inputted ID (wrongfully) appears multiple times in the datastore."
             }
@@ -376,7 +332,6 @@ class PackageById(Resource): # also why is this a POST request
         
         # If we get here: DELETE the package 
         # Get the package/entity
-        logger.info("Deleting package...")
         key = datastore_client.key('package', input_id)
         datastore_client.delete(key)
         
