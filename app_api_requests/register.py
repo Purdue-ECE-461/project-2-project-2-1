@@ -9,6 +9,14 @@ import base64
 import json
 import uuid
 import os
+import google.cloud.logging
+import logging
+
+client = google.cloud.logging.Client()
+client.setup_logging()
+logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+    datefmt='%Y-%m-%d:%H:%M:%S')
+logger = logging.getLogger(__name__)
 
 def print_to_stdout(*a):
     print(*a, file = sys.stdout)
@@ -21,6 +29,8 @@ def uuid1():
 # 200: Successful upload of a new user
 class Register(Resource):
     def put(self, current_user_name):
+        logger.info('Executing PUT /register/:current_user_name endpoint...')
+        logger.info('Getting request data...')
         request.get_data()
         
         decoded_data = request.data.decode("utf-8")
@@ -36,6 +46,7 @@ class Register(Resource):
         # (a) Current_User Authentication:
         auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
         token = auth_header.split()[1] # token = "[token]"
+        logger.info('Token: ' + token)
 
         # If token is in the database --> valid user
         # datastore_client = datastore.Client()
@@ -43,8 +54,10 @@ class Register(Resource):
         query = datastore_client.query(kind='user')
         query.add_filter("bearerToken", "=", token)
         results = list(query.fetch())
+        logger.info('Number of users with matching tokens: ' + str(len(results)))
 
         if len(results) == 0: # The token is NOT in the database --> Invalid user
+            logger.error('Token: ' + token + ' does not match any registered users.')
             response = {
                 'message': "Unauthorized user. Bearer Token provided is not in the datastore."
             }
@@ -52,11 +65,14 @@ class Register(Resource):
         # else, the current user is in the database. Carry on.
         
         # (b) see if the Current User's: "isAdmin == true"
+        logger.info("Checking if user is an admin...must be an admin to register other users")
         key = datastore_client.key('user', current_username) # current_user_name that's provided in the parameter path
         current_user_entity = datastore_client.get(key)
         current_user_isAdmin = current_user_entity["isAdmin"]
         
         if not(current_user_isAdmin) or (current_user_isAdmin=="False") or (current_user_isAdmin=="false"): # If the current user (who's trying to upload a new user) is NOT an Admin --> Can't upload.
+            logger.error("Current user ("+current_username+") is not an Admin. Therefore cannot upload a new user.")
+            logger.error(current_username + "  has an isAdmin == " + str(current_user_isAdmin) + ". Thus cannot upload another user.")
             response = {
                 'message': "Current user is not an Admin. Therefore cannot upload a new user."
             }
@@ -69,12 +85,13 @@ class Register(Resource):
 
             new_user_password = request_body['Secret']['password']
         except Exception:
+            logger.error("Error getting values from request body.. Some fields may be null")
             response = {
                 "message": "Error getting values from request body."
             }
             return response, 401
 
-
+        logger.info("Creating a new user using the values successfuly gotten from the request body...")
         # Create a new user
         # The kind for the new entity
         kind = 'user'
@@ -88,7 +105,7 @@ class Register(Resource):
         # Prepares the new entity
         new_user = datastore.Entity(key=new_user_key)
         new_user['name'] = new_user_name
-        new_user['isAdmin'] = str(new_user_isAdmin)
+        new_user['isAdmin'] = str(new_user_isAdmin) # is this wrong to do. should i not convert it to a string ....
         new_user['password'] = new_user_password
         token = uuid.uuid1().hex
         new_user['bearerToken'] = token
