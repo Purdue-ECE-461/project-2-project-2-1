@@ -37,6 +37,13 @@ jobs:
           pip3 install --upgrade pip
           pip install --upgrade setuptools
           pip install -r requirements.txt
+          sudo apt-get install google-cloud-sdk-datastore-emulator
+          
+      - name: Running PyTest
+        run: |
+          gcloud beta emulators datastore start --data-dir=tests/datastore
+          python main.py
+          pytest tests/
 
 #       - name: Deploy to App Engine
 #         run: gcloud app deploy --quiet
