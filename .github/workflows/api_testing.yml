@@ -53,8 +53,7 @@ jobs:
           sleep 10
           python main.py &
           sleep 10
-          coverage run -m pytest tests/
-          coverage report
+          coverage run -m pytest tests/ && coverage report -m
           
           
 
