@@ -23,7 +23,7 @@ jobs:
       
       - name: Confirm Environment Variables
         run: |
-          echo ${{ env.PROJECT_ID }}
+          echo ${{ secrets.GCP_PROJECT }}
 
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v0.2.0
