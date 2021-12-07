@@ -55,7 +55,7 @@ jobs:
           sleep 10
           coverage run -m pytest tests/ && coverage report -m
           
-          
+
 
 #       - name: Deploy to App Engine
 #         run: gcloud app deploy --quiet
