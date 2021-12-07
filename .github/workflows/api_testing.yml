@@ -37,7 +37,7 @@ jobs:
           pip3 install --upgrade pip
           pip install --upgrade setuptools
           pip install -r requirements.txt
-          gcloud components install cloud-datastore-emulator --quiet
+          gcloud components install cloud-datastore-emulator beta --quiet
           
       - name: Running PyTest
         run: |
