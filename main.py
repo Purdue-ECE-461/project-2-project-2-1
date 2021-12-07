@@ -25,6 +25,9 @@ from google.cloud import datastore
 from app_api_requests.datastore_client_factory import get_datastore_client
 from tests import test_utils as Tests
 
+# Logging
+import google.cloud.logging
+import logging
 
 # Internal imports
 # Import your desired 
@@ -87,6 +90,15 @@ def root():
     # this return stmt: DISPLAYS the gotten info to the site's screen. (we don't need to show anything for the project2)
     return render_template('index.html', times=times)
 
+# Instantiates a logging client, setup will reroute python logs to GCP
+client = google.cloud.logging.Client()
+client.setup_logging()
+logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+    datefmt='%Y-%m-%d:%H:%M:%S')
+logger = logging.getLogger(__name__)
+
+
+logger.info('Adding API resources to application...')
 
 api.add_resource(CreatePackage, '/package', endpoint='/package')
 api.add_resource(PackageById, '/package/<string:id>')
@@ -94,6 +106,9 @@ api.add_resource(RatePackage, '/package/<string:id>/rate', endpoint='/package_ra
 api.add_resource(Reset, '/reset', endpoint='/reset')
 api.add_resource(Authenticate, '/authenticate')
 api.add_resource(Register, '/register/<string:current_user_name>')
+
+logger.info('Resources added, app is running')
+
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
