@@ -14,8 +14,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
-    name: Deploy
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -41,6 +41,7 @@ jobs:
           
       - name: Running PyTest
         run: |
+          gcloud config set project ${{ env.PROJECT_ID }}
           gcloud beta emulators datastore start --data-dir=tests/datastore --quiet && 
           sleep 10 && 
           gcloud beta emulators datastore env-init &&
