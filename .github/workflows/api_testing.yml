@@ -45,7 +45,7 @@ jobs:
           
       - name: Running PyTest
         run: |
-          gcloud config set project ${{ env.PROJECT_ID }}
+          gcloud config set project ${{ secrets.GCP_PROJECT }}
           gcloud beta emulators datastore start --data-dir=tests/datastore --quiet && 
           sleep 10 && 
           gcloud beta emulators datastore env-init &&
