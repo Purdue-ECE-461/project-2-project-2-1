@@ -47,12 +47,15 @@ jobs:
         run: |
           gcloud config set project ${{ secrets.GCP_PROJECT }}
           gcloud beta emulators datastore start --data-dir=tests/datastore --quiet && 
-          sleep 10 && 
+          sleep 10
           gcloud beta emulators datastore env-init &&
-          sleep 10 &&
+          sleep 10
           python main.py &&
-          sleep 10 &&
+          sleep 10
           pytest tests/
+          exit 0
+          
+          
 
 #       - name: Deploy to App Engine
 #         run: gcloud app deploy --quiet
