@@ -3,116 +3,94 @@ from tests.test_utils import setup_test_datastore, generate_header, clear_regist
 import requests
 import pytest
 
-# Registering User: "200: Success"
-def test_register1():
+# "ece461defaultadminuser" is registering "newUser" --> "200: Success"
+def test_register_200():
     client = get_datastore_client()
-    clear_registry()
 
     header = generate_header()
     query = {
-        "metadata": {
-            "Name": "Express",
-            "Version": "4.17.1",
-            "ID": "express"
+        "User": {
+            "name": "newUser",
+            "isAdmin": True
         },
-        "data": {
-            "URL": "https://github.com/expressjs/express",
-            "JSProgram": "if (process.argv.length === 7) {\nconsole.log('\''Success'\'')\nprocess.exit(0)\n} else {\nconsole.log('\''Failed'\'')\nprocess.exit(1)\n}\n"
+        "Secret": {
+            "password": "newUserPassword"
         }
     }
 
-    response = requests.post('http://127.0.0.1:8080/package', headers=header, json=query)
-    assert response.status_code == 201
+    response = requests.put('http://127.0.0.1:8080/register/ece461defaultadminuser', headers=header, json=query)
+    assert response.status_code == 200
 
     response = response.json()
 
-    assert response['Name'] == 'Express'
-    assert response['Version'] == '4.17.1'
-    assert response['ID'] == 'express'
+    query = client.query(kind='user')
+    query.add_filter("name", "=", "newUser")
+    user_entity = list(query.fetch())[0]
 
-    query = client.query(kind='package')
-    query.add_filter("ID", "=", 'express')
-    package_entity = list(query.fetch())[0]
+    assert user_entity['name'] == "newUser"
+    assert user_entity['isAdmin'] == "True"
+    assert user_entity['password'] == 'newUserPassword'
+    assert user_entity['bearerToken'] != '' # Assert that the field isn't blank, and a token was assigned
 
-    assert package_entity['Name'] == 'Express'
-    assert package_entity['Version'] == '4.17.1'
-    assert package_entity['ID'] == 'express'
-    assert package_entity['Content'] == ''
-    assert package_entity['URL'] == 'https://github.com/expressjs/express'
 
-# Registering another User: "200: Success"
-def test_register2():
-    client = get_datastore_client()
-    clear_registry()
-
-    header = generate_header()
-    query = {
-        "metadata": {
-            "Name": "Debug",
-            "Version": "4.3.3",
-            "ID": "debug"
-        },
-        "data": {
-            "URL": "https://github.com/debug-js/debug",
-            "JSProgram": "if (process.argv.length === 7) {\nconsole.log('\''Success'\'')\nprocess.exit(0)\n} else {\nconsole.log('\''Failed'\'')\nprocess.exit(1)\n}\n"
-        }
-    }
-
-    response = requests.post('http://127.0.0.1:8080/package', headers=header, json=query)
-    assert response.status_code == 201
-
-    response = response.json()
-
-    assert response['Name'] == 'Debug'
-    assert response['Version'] == '4.3.3'
-    assert response['ID'] == 'debug'
-
-    query = client.query(kind='package')
-    query.add_filter("ID", "=", 'debug')
-    package_entity = list(query.fetch())[0]
-
-    assert package_entity['Name'] == 'Debug'
-    assert package_entity['Version'] == '4.3.3'
-    assert package_entity['ID'] == 'debug'
-    assert package_entity['Content'] == ''
-    assert package_entity['URL'] == 'https://github.com/debug-js/debug'
 
 # "401: The user uploading is NOT an Admin "
 def test_register_401_not_admin():
     client = get_datastore_client()
-    clear_registry()
 
+    # ece461defaultadminuser is registering this NON-ADMIN user
     header = generate_header()
     query = {
-        "metadata": {
-            "Name": "InversifyJS",
-            "Version": "6.0.1",
-            "ID": "inversifyJS"
+        "User": {
+            "name": "newUser1",
+            "isAdmin": False
         },
-        "data": {
-            "URL": "https://github.com/inversify/InversifyJS",
-            "JSProgram": "if (process.argv.length === 7) {\nconsole.log('\''Success'\'')\nprocess.exit(0)\n} else {\nconsole.log('\''Failed'\'')\nprocess.exit(1)\n}\n"
+        "Secret": {
+            "password": "newUser1Password"
         }
     }
 
-    response = requests.post('http://127.0.0.1:8080/package', headers=header, json=query)
-    assert response.status_code == 201
+    response = requests.put('http://127.0.0.1:8080/register/ece461defaultadminuser', headers=header, json=query)
+    assert response.status_code == 200
 
-    response = response.json()
+    # Now, "newUser1" (NOT admin) is registering "newUser2" (is an admin)
+    # get "newUser1"'s header:
+    query = client.query(kind='user')
+    query.add_filter('name', '=', 'newUser1')
+    user_entity = list(query.fetch())[0]
 
-    assert response['Name'] == 'InversifyJS'
-    assert response['Version'] == '6.0.1'
-    assert response['ID'] == 'inversifyJS'
+    auth_token = user_entity['bearerToken']
+    header = {'X-Authorization': 'bearer ' + auth_token}
 
-    query = client.query(kind='package')
-    query.add_filter("ID", "=", 'inversifyJS')
-    package_entity = list(query.fetch())[0]
+    # "newUser1" (NOT admin) is registering "newUser2"
+    query = {
+        "User": {
+            "name": "newUser2",
+            "isAdmin": False
+        },
+        "Secret": {
+            "password": "newUser2Password"
+        }
+    }
 
-    assert package_entity['Name'] == 'InversifyJS'
-    assert package_entity['Version'] == '6.0.1'
-    assert package_entity['ID'] == 'inversifyJS'
-    assert package_entity['Content'] == ''
-    assert package_entity['URL'] == 'https://github.com/inversify/InversifyJS'
+    response = requests.put('http://127.0.0.1:8080/register/newUser1', headers=header, json=query)
+    assert response.status_code == 401
 
-# "401: The user uploading has an invalid X-auth "
+# "401: The user uploading ("ece461defaultadminuser") has an invalid X-auth "
 def test_register_401_wrong_XAuth():
+    client = get_datastore_client()
+
+    # WRONG auth token of the "uploader"
+    header = {'X-Authorization': 'bearer ' + "invalid_auth_token"}
+    query = {
+        "User": {
+            "name": "newUser",
+            "isAdmin": False
+        },
+        "Secret": {
+            "password": "newUserPassword"
+        }
+    }
+
+    response = requests.put('http://127.0.0.1:8080/register/ece461defaultadminuser', headers=header, json=query)
+    assert response.status_code == 401

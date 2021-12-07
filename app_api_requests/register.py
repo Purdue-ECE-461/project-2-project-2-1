@@ -59,7 +59,7 @@ class Register(Resource):
         
         # print_to_stdout(current_user_isAdmin)
 
-        if not(current_user_isAdmin): # If the current user (who's trying to upload a new user) is NOT an Admin --> Can't upload.
+        if not(current_user_isAdmin) or (current_user_isAdmin=="False") or (current_user_isAdmin=="false"): # If the current user (who's trying to upload a new user) is NOT an Admin --> Can't upload.
             response = {
                 'message': "Current user is not an Admin. Therefore cannot upload a new user."
             }

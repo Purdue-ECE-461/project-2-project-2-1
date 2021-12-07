@@ -22,10 +22,12 @@ from flask_restful import Api
 
 # Import the Google Cloud client library
 from google.cloud import datastore
+from app_api_requests.datastore_client_factory import get_datastore_client
+from tests import test_utils as Tests
+
 
 # Internal imports
 # Import your desired 
-
 from app_api_requests.create_package import CreatePackage
 from app_api_requests.package_by_id import PackageById
 from app_api_requests.rate_package import RatePackage
@@ -35,6 +37,7 @@ from app_api_requests.register import Register
 
 # Instantiates a client
 datastore_client = datastore.Client()
+# datastore_client = get_datastore_client()
 
 app = Flask(__name__)
 api = Api(app)
@@ -75,25 +78,14 @@ def fetch_times(limit):
 
 @app.route('/')
 def root():
-    # add the default user to the datastore
-    # setting the key
-    user_entity = datastore.Entity(key=datastore_client.key('user'))
-    # setting properties
-    user_entity.update({
-        "name": "ece461defaultadminuser",
-        "isAdmin": True,
-        "password": "correcthorsebatterystaple123(!__+@**(A",
-        "bearerToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-    })
-
     # Store the current access time in Datastore.
-    # store_time(datetime.datetime.now())
+    store_time(datetime.datetime.now())
 
     # Fetch the most recent 10 access times from Datastore.
-    # times = fetch_times(10)
+    times = fetch_times(10)
 
     # this return stmt: DISPLAYS the gotten info to the site's screen. (we don't need to show anything for the project2)
-    # return render_template('index.html', times=times)
+    return render_template('index.html', times=times)
 
 
 api.add_resource(CreatePackage, '/package', endpoint='/package')
@@ -111,6 +103,7 @@ if __name__ == '__main__':
     # the "static" directory. See:
     # http://flask.pocoo.org/docs/1.0/quickstart/#static-files. Once deployed,
     # App Engine itself will serve those files as configured in app.yaml.
+    # Tests.setup_test_datastore()
     app.run(host='127.0.0.1', port=8080, debug=True)
 # [END gae_python3_render_template]
 # [END gae_python38_render_template]
