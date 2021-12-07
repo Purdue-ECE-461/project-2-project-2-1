@@ -33,8 +33,6 @@ def test_rate_package_normal():
     assert response.status_code == 200
 
     response = response.json()
-    if 'message' in response.keys():
-        print(response['message'])
     
     metric_names = ['BusFactor', 'Correctness', 'ResponsiveMaintainer', 'LicenseScore', 'GoodPinningPractice']
     for m in metric_names:
