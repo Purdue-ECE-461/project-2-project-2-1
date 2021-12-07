@@ -14,18 +14,23 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
-    name: Deploy
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Setup Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0.2.0
+        
+      - name: Authenticate
+        uses: 'google-github-actions/auth@v0.4.0'
         with:
-          project_id: ${{ env.PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.3.0
+        
+      - name: Use gcloud CLI
+        run: gcloud info
           
       - name: Set up Python 3.7.5
         uses: actions/setup-python@v2
@@ -37,13 +42,19 @@ jobs:
           pip3 install --upgrade pip
           pip install --upgrade setuptools
           pip install -r requirements.txt
-          sudo apt-get install google-cloud-sdk-datastore-emulator
+          gcloud components install cloud-datastore-emulator beta --quiet
           
       - name: Running PyTest
         run: |
-          gcloud beta emulators datastore start --data-dir=tests/datastore
-          python main.py
+          gcloud config set project ${{ secrets.GCP_PROJECT }}
+          gcloud beta emulators datastore start --data-dir=tests/datastore --quiet &
+          sleep 10
+          python main.py &
+          sleep 10
           pytest tests/
+          exit 0
+          
+          
 
 #       - name: Deploy to App Engine
 #         run: gcloud app deploy --quiet

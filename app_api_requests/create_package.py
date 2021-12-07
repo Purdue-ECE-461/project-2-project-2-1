@@ -280,15 +280,12 @@ class CreatePackage(Resource):
             # Use the "URL" field to clone repo
             repo_name = package_url.split('.git')[0].split('/')[-1]
             Repo.clone_from(package_url, repo_name)
-
             # Get the folder with repository --> zip file
             shutil.make_archive(repo_name, 'zip') #  base_name="/")
-
             # Encode the zipfule in base64
             with open(repo_name+".zip", "rb") as f:
                 bytes = f.read()
                 encode_string = base64.b64encode(bytes)
-
             # Add the encoded string to entity's Content field
             package_entity['Content'] = encode_string
             # print_to_stdout(encode_string)
