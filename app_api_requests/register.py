@@ -54,11 +54,8 @@ class Register(Resource):
         # (b) see if the Current User's: "isAdmin == true"
         key = datastore_client.key('user', current_username) # current_user_name that's provided in the parameter path
         current_user_entity = datastore_client.get(key)
-        # current_user_entity = datastore_client.key(key, exclude_from_indexes=['bearerToken'])
         current_user_isAdmin = current_user_entity["isAdmin"]
         
-        # print_to_stdout(current_user_isAdmin)
-
         if not(current_user_isAdmin) or (current_user_isAdmin=="False") or (current_user_isAdmin=="false"): # If the current user (who's trying to upload a new user) is NOT an Admin --> Can't upload.
             response = {
                 'message': "Current user is not an Admin. Therefore cannot upload a new user."
