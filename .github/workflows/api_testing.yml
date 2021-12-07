@@ -53,7 +53,7 @@ jobs:
           sleep 10
           python main.py &
           sleep 10
-          pytest tests/test_rate.py
+          pytest tests/
           exit 0
           
           
