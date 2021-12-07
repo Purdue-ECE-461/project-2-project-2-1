@@ -2,12 +2,23 @@ from app_api_requests.datastore_client_factory import get_datastore_client
 from flask_restful import Resource
 from flask import request
 
+import google.cloud.logging
+import logging
+
 import json
 
+client = google.cloud.logging.Client()
+client.setup_logging()
+logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+    datefmt='%Y-%m-%d:%H:%M:%S')
+logger = logging.getLogger(__name__)
 
 class RatePackage(Resource):
     def get(self, id):
+        logger.info('Executing /reset endpoint...')
+        logger.info('Getting request data...')
         request.get_data()
+        
         
         # User Authentication:
         auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
