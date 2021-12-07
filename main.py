@@ -22,20 +22,25 @@ from flask_restful import Api
 
 # Import the Google Cloud client library
 from google.cloud import datastore
+from app_api_requests.datastore_client_factory import get_datastore_client
+from tests import test_utils as Tests
 
 # Logging
 import google.cloud.logging
 import logging
 
 # Internal imports
+# Import your desired 
 from app_api_requests.create_package import CreatePackage
 from app_api_requests.package_by_id import PackageById
 from app_api_requests.rate_package import RatePackage
 from app_api_requests.reset import Reset
 from app_api_requests.authenticate import Authenticate
+from app_api_requests.register import Register
 
 # Instantiates a client
 datastore_client = datastore.Client()
+# datastore_client = get_datastore_client()
 
 app = Flask(__name__)
 api = Api(app)
@@ -94,12 +99,16 @@ logger = logging.getLogger(__name__)
 
 
 logger.info('Adding API resources to application...')
+
 api.add_resource(CreatePackage, '/package', endpoint='/package')
 api.add_resource(PackageById, '/package/<string:id>')
 api.add_resource(RatePackage, '/package/<string:id>/rate', endpoint='/package_rate')
 api.add_resource(Reset, '/reset', endpoint='/reset')
 api.add_resource(Authenticate, '/authenticate')
+api.add_resource(Register, '/register/<string:current_user_name>')
+
 logger.info('Resources added, app is running')
+
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
@@ -109,6 +118,7 @@ if __name__ == '__main__':
     # the "static" directory. See:
     # http://flask.pocoo.org/docs/1.0/quickstart/#static-files. Once deployed,
     # App Engine itself will serve those files as configured in app.yaml.
+    # Tests.setup_test_datastore()
     app.run(host='127.0.0.1', port=8080, debug=True)
 # [END gae_python3_render_template]
 # [END gae_python38_render_template]

@@ -212,7 +212,7 @@ curl --location --request DELETE 'http://127.0.0.1:8080/reset' \
 AUTHENTICATE a user:
 ** make sure that there is an Entity for the user under: kind  = "user"
 
-curl --location --request PUT 'https://ece461-project2.ue.r.appspot.com/authenticate' \
+curl -i --location --request PUT 'https://ece461-project2.ue.r.appspot.com/authenticate' \
 --data-raw '{
     "User": {
         "name": "ece461defaultadminuser",
@@ -234,3 +234,36 @@ curl --location --request PUT 'http://127.0.0.1:8080/authenticate' \
         "password": "correcthorsebatterystaple123(!__+@**(A"
     }
 }'
+
+-----------
+
+REGISTER a user:
+* The user uploading a user needs to be 
+(a) authenticated
+(b) isAdmin == True
+
+curl -i --location --request PUT 'https://ece461-project2.ue.r.appspot.com/register/ece461defaultadminuser' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
+--data-raw '{
+    "User": {
+        "name": "newUser",
+        "isAdmin": true
+    },
+    "Secret": {
+        "password": "newUserPassword"
+    }
+}'
+
+**Local Version
+curl -i --location --request PUT 'http://127.0.0.1:8080/register/ece461defaultadminuser' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
+--data-raw '{
+    "User": {
+        "name": "newUser",
+        "isAdmin": true
+    },
+    "Secret": {
+        "password": "newUserPassword"
+    }
+}'
+
