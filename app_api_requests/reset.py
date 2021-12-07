@@ -40,7 +40,7 @@ class Reset(Resource):
             response = {
                 'message': "Unauthorized user. Bearer Token is not in the datastore."
             }
-            return response, 400
+            return response, 401
         # else, the user is in the database. Carry on.
 
         logger.info('Clearing registry of all packages...')
@@ -48,6 +48,26 @@ class Reset(Resource):
         results = list(query.fetch())
         ids = [datastore_client.key('package', x['ID']) for x in results]
         datastore_client.delete_multi(ids)
+        logger.info('Package-Registry cleared')
 
-        logger.info('Registry cleared')
+        logger.info('Clearing registry of all users...')
+        query = datastore_client.query(kind='user')
+        results = list(query.fetch())
+        logger.info('Fetching the current users in the database to delete...')
+        logger.info(results)
+        ids = [datastore_client.key('user', x['name']) for x in results ] # if (x['name'] is not "ece461defaultadminuser")]
+    
+        # Don't delete the admin-user. Remove from the list of user-ids-to-delete
+        save_key = datastore_client.key('user', "ece461defaultadminuser")
+        ids.remove( save_key )
+
+        logger.info('Deleting users from the database...')
+        logger.info('ece461defaultadminuser not included in the deletion')
+        logger.info(ids)
+
+        # Now delete
+        datastore_client.delete_multi(ids)
+        logger.info('User-Registry cleared. ece461defaultadminuser still there.')
+        
+
         return {}, 200
