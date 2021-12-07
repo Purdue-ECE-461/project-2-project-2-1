@@ -30,6 +30,10 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
+      - name: Authenticate
+        uses: 'google-github-actions/auth@v0.4.0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
           
       - name: Set up Python 3.7.5
         uses: actions/setup-python@v2
