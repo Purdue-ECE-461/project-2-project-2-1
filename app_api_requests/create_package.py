@@ -87,12 +87,12 @@ class CreatePackage(Resource):
             if not valid: # if: 1 or more of the scores are <0.5 --> Don't upload the package
                 response = {
                     "message": "1 or more Rating Scores <0.5. Unable to Upload." + " " + \
-                    #  str(scores["RAMP_UP_SCORE"]) + " " + \
-                    #  str(scores['CORRECTNESS_SCORE']) + " " + \
-                    #  str(scores["BUS_FACTOR_SCORE"]) + " " + \
-                    #  str(scores['RESPONSIVE_MAINTAINER_SCORE']) + " " + \
-                    #  str(scores["LICENSE_SCORE"]) + " " + \
-                    #  str(scores['GOOD_PINNING_PRACTICE_SCORE'])
+                     str(scores["RAMP_UP_SCORE"]) + " " + \
+                     str(scores['CORRECTNESS_SCORE']) + " " + \
+                     str(scores["BUS_FACTOR_SCORE"]) + " " + \
+                     str(scores['RESPONSIVE_MAINTAINER_SCORE']) + " " + \
+                     str(scores["LICENSE_SCORE"]) + " " + \
+                     str(scores['GOOD_PINNING_PRACTICE_SCORE'])
                 }
                 return response, 400
             # else: all the Scores are >=0.5! Yay, continue to upload/create the package.
