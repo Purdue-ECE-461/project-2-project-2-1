@@ -32,9 +32,8 @@ def test_create_new_package_with_content():
     assert response['Version'] == '1.0.0'
     assert response['ID'] == 'freeCodeCamp'
 
-    query = client.query(kind='package')
-    query.add_filter("ID", "=", 'freeCodeCamp')
-    package_entity = list(query.fetch())[0]
+    key = client.key('package', 'freeCodeCamp')
+    package_entity = client.get(key)
 
     assert package_entity['Name'] == 'FreeCodeCamp'
     assert package_entity['Version'] == '1.0.0'
