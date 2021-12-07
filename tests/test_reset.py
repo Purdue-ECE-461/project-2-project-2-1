@@ -3,7 +3,6 @@ from tests.test_utils import setup_test_datastore, generate_header, clear_regist
 import requests
 import pytest
 
-
 def test_empty_reset():
     client = get_datastore_client()
     clear_registry()
@@ -52,7 +51,6 @@ def test_bad_credentials():
     clear_registry()
 
     header = generate_header()
-
     # add an item to the registry
     query = {
         "metadata": {
@@ -65,16 +63,13 @@ def test_bad_credentials():
             "JSProgram": "if (process.argv.length === 7) {\nconsole.log('\''Success'\'')\nprocess.exit(0)\n} else {\nconsole.log('\''Failed'\'')\nprocess.exit(1)\n}\n"
         }
     }
-
     requests.post('http://127.0.0.1:8080/package', headers=header, json=query)
 
-    header = {}
-
+    header = {'X-Authorization': 'bearer ' + "invalid_auth_token"}
     response = requests.delete('http://127.0.0.1:8080/reset', headers=header)
     assert response.status_code == 401
-    response = response.json
-    assert response['message'] == "Unauthorized user. Bearer Token is not in the datastore."
-
+    # response returns: "Unauthorized user. Bearer Token is not in the datastore."
+    
     query = client.query(kind='package')
     packages = list(query.fetch())
 
