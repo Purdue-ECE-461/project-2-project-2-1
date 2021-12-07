@@ -1,6 +1,6 @@
 # Upon pushes and pull requests into main, this workflow will run our test suite
 
-name: Continuous Integration testing
+name: Package Rating Testing (CI)
 
 on:
   push:
