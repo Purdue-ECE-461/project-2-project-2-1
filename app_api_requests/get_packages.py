@@ -53,7 +53,9 @@ class GetPackages(Resource):
         
         # Initialize empty request dictionaries so we can append
         # as many as are included in the POST request
-        if package_results: #if this returns true, then take the above values instead. otherwise, it is either empty or not all packages. both are fine
+        if package_results:  #if this returns true, then take the above values instead. otherwise, it is either empty or not all packages. both are fine
+            pass
+        else:
             package_dict = {}
             package_names = []
             package_versions = []
@@ -80,7 +82,8 @@ class GetPackages(Resource):
                     "message": "Package Name(s) do not match any packages currently in registry."
                 }
                 return response, 400
-            print(package_results,file=sys.stdout)
+            
+        print(package_results,file=sys.stdout)
         pass
     
         # TODO - Take list of packages from above, and check the versions with

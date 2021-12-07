@@ -267,3 +267,35 @@ curl -i --location --request PUT 'http://127.0.0.1:8080/register/ece461defaultad
     }
 }'
 
+-------------------------------------------------------------------------------
+
+Get Packages:
+From Postman sample:
+
+curl --location --request POST 'https://ece461-project2.ue.r.appspot.com/packages?offset=10' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
+--data-raw '[
+  {
+    "Version": "1.2.3",
+    "Name": "Underscore"
+  },
+  {
+    "Version": "1.2.3-2.1.0",
+    "Name": "Lodash"
+  }
+]'
+
+Nick Test Case for "*":
+curl --location --request POST 'https://ece461-project2.ue.r.appspot.com/packages?offset=10' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
+--data-raw '[
+  {
+    "Version": "1.2.3",
+    "Name": "Underscore"
+  },
+  {
+    "Version": "1.2.3-2.1.0",
+    "Name": "Lodash"
+  }
+]'
+
