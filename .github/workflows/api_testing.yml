@@ -54,7 +54,7 @@ jobs:
           python main.py &
           sleep 10
           coverage run -m pytest tests/
-          exit 0
+          coverage report
           
           
 
