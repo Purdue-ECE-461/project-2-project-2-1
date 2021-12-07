@@ -76,14 +76,15 @@ class CreatePackage(Resource):
             # Calculate scores
             scores = compute_package_scores(package_url)
             print_to_stdout(scores)
-            valid_scores = ( (float(scores["RAMP_UP_SCORE"]) >= 0.5)
-                                & (float(scores['CORRECTNESS_SCORE']) >= 0.5)
-                                & (float(scores['BUS_FACTOR_SCORE']) >= 0.5)
-                                & (float(scores['RESPONSIVE_MAINTAINER_SCORE']) >= 0.5)
-                                & (float(scores['LICENSE_SCORE']) >= 0.5)
-                                & (float(scores['GOOD_PINNING_PRACTICE_SCORE']) >= 0.5)
-                            )
-            if not( valid_scores ): # if: 1 or more of the scores are <0.5 --> Don't upload the package
+
+            valid = (float(scores["RAMP_UP_SCORE"]) >= 0.5) and \
+                    (float(scores['CORRECTNESS_SCORE']) >= 0.5) and \
+                    (float(scores['BUS_FACTOR_SCORE']) >= 0.5) and \
+                    (float(scores['RESPONSIVE_MAINTAINER_SCORE']) >= 0.5) and \
+                    (float(scores['LICENSE_SCORE']) >= 0.5) and \
+                    (float(scores['GOOD_PINNING_PRACTICE_SCORE']) >= 0.5)
+        
+            if not valid: # if: 1 or more of the scores are <0.5 --> Don't upload the package
                 response = {
                     "message": "1 or more Rating Scores <0.5. Unable to Upload."
                 }

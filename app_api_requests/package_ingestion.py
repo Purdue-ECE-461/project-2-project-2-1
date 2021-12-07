@@ -2,15 +2,20 @@ from app_api_requests.datastore_client_factory import get_datastore_client
 from app_api_requests.package_rating.metrics import Metric
 import logging
 
+import os
+
 from google.cloud import datastore
 
 def compute_package_scores(package_url):
     log = logging.getLogger()
     
-    datastore_client = get_datastore_client()
-    query = datastore_client.query(kind='tokens')
-    results = list(query.fetch())
-    github_token = results[0]['GITHUB_TOKEN']
+    if 'GITHUB_TOKEN' not in os.environ:
+        datastore_client = get_datastore_client()
+        query = datastore_client.query(kind='tokens')
+        results = list(query.fetch())
+        github_token = results[0]['GITHUB_TOKEN']
+    else:
+        github_token = os.environ['GITHUB_TOKEN']
 
     metric = Metric(github_token, [package_url], log)
 
