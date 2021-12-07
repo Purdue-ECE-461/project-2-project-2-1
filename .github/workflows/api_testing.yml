@@ -41,7 +41,7 @@ jobs:
           
       - name: Running PyTest
         run: |
-          gcloud beta emulators datastore start --data-dir=tests/datastore --quiet && 
+          gcloud beta emulators datastore start --quiet --data-dir=tests/datastore && 
           sleep 10 && 
           python main.py &&
           sleep 10 &&
