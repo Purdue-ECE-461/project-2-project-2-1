@@ -46,10 +46,9 @@ def test_package_by_id_get_REPO4_ingestion():
 
     # check to be 100% sure that the package was uploaded (via ingestion) to the datastore right
     # content should be empty, we don't store it, we only return it
-    query = client.query(kind='package')
-    query.add_filter("ID", "=", 'debug')
-    package_entity = list(query.fetch())[0]
-
+    key = client.key('package', 'debug')
+    package_entity = client.get(key)
+    
     assert package_entity['Name'] == 'Debug'
     assert package_entity['Version'] == '4.3.3'
     assert package_entity['ID'] == 'debug'
