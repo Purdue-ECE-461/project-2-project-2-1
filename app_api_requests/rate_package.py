@@ -34,13 +34,13 @@ class RatePackage(Resource):
             response = {
                 'message': "Unauthorized user. Bearer Token is not in the datastore."
             }
-            return response, 1 # change back to 400
+            return response, 400
         # else, the user is in the database. Carry on.
         
         package_key = datastore_client.key('package', id)
         package = datastore_client.get(package_key)
         if package is None:
-            return {}, 2        # change back to 400     
+            return {}, 400
 
         ramp_up_score = package['RampUp']
         correctness_score = package['Correctness']
