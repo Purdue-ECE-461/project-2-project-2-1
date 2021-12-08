@@ -81,7 +81,7 @@ class GetPackages(Resource):
                         "Name": package['Name'],
                         "Version": package['Version'],
                         "ID" : package['ID']})
-            print_to_stdout(responseALL)
+            print_to_stdout(json.dumps(responseALL, sort_keys=True, indent=4))
             for key in query_package_dict.keys():    
                 print_to_stdout("QUERY DICT:",query_package_dict[key][0:3])
                 
