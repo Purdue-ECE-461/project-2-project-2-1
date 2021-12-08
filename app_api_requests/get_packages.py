@@ -138,7 +138,7 @@ class GetPackages(Resource):
                 query = datastore_client.query(kind='package')
                 query.add_filter("Name", "=", package_name)
                 #query.projection = ["Name", "Version", "ID"]
-                package_results.append(list(query.fetch()))
+                package_results.append(query.fetch())
         
 
             # Check to see if these Package name(s) actually exist in the registry
