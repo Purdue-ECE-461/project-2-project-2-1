@@ -311,3 +311,16 @@ curl -i --location --request POST 'http://127.0.0.1:8080/package' \
 }'
 NICK TESTING HERE ----
 
+curl -i --location --request POST 'http://127.0.0.1:8080/package' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
+--data-raw '{
+	"metadata": {
+		"Name": "Lodash",
+		"Version": "1.2.5",
+		"ID": "lodash_local"
+	},
+	"data": {
+		"Content": "",
+		"JSProgram": "if (process.argv.length === 7) {\nconsole.log('\''Success'\'')\nprocess.exit(0)\n} else {\nconsole.log('\''Failed'\'')\nprocess.exit(1)\n}\n"
+	}
+}'
