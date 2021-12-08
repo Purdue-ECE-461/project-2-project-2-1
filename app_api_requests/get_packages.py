@@ -138,7 +138,7 @@ class GetPackages(Resource):
                 query = datastore_client.query(kind='package')
                 query.add_filter("Name", "=", package_name)
                 #query.projection = ["Name", "Version", "ID"]
-                package_results.append(query.fetch())
+                package_results.append(list(query.fetch()))
         
 
             # Check to see if these Package name(s) actually exist in the registry
@@ -152,9 +152,11 @@ class GetPackages(Resource):
             
             
             # Print out raw query results
+            print_to_stdout("Length of Raw Query Results:",len(package_results))
             print_to_stdout("RAW QUERY RESULTS:",package_results) #TODO remove 
             #print_to_stdout("json load QUERY RESULTS", json.loads(package_results))
             # Attempt to parse the query
+            '''
             query_output = []
             for package in package_results:
                 query_output.append({
@@ -184,7 +186,8 @@ class GetPackages(Resource):
                         # this means that the package was not found, no need to check it. it won't be included in the final
                         pass
                 
-            
+            '''
+            # Marking
             '''
             for key in query_output.keys():
                 print_to_stdout("Query Dict: ",key,':',query_output[key])
