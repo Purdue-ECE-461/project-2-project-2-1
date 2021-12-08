@@ -10,9 +10,10 @@ def print_to_stdout(*a):
     print(*a, file = sys.stdout)
     
 class GetPackages(Resource):
-    def get(self, offset):
+    def get(self):
+        print("BEGIN GETPACKAGES?!?!?!?!?!?")
         request.get_data() # Get everything from the request/URL (path params)
-
+        
         # User Authentication:
         auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
         token = auth_header.split()[1] # token = "[token]"
@@ -89,9 +90,10 @@ class GetPackages(Resource):
                     "message": "Package Name(s) do not match any packages currently in registry."
                 }
                 return response, 400
-        print("hello")    
+        # Print out query results
+        print_to_stdout(package_results)    
         response = {
-            package_results
+            "message": "We made it to the end of get_packages."#package_results
         }
         return response, 200 #just randomly chose 200 
     
