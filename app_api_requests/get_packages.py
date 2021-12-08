@@ -239,7 +239,7 @@ class GetPackages(Resource):
                 "code": -1,
                 'message': "Unauthorized user. Bearer Token is not in the datastore."
             }
-            return response, 500
+            return response, 500, {"offset":offset}
         # else, the user is in the database. Carry on.
     
         
@@ -269,11 +269,11 @@ class GetPackages(Resource):
             # Check to see if these Package name(s) actually exist in the registry
             if (len(package_results_all) == 0 ): # This Combo doesn't exist
                 response = {
-                    "code": -1,
-                    "description": "Malformed request (e.g. no such packages).",
+                    "code": 200,
+                    "description": "Registry is empty.",
                     "message": "Package Name(s) do not match any packages currently in registry."
                 }
-                return response, 500
+                return response, 200, {"offset":offset}
             # Print out raw query results
             print_to_stdout("RAW QUERY RESULTS:",package_results_all) #TODO remove
             #print_to_stdout("json load QUERY RESULTS", json.loads(package_results_all))
@@ -340,7 +340,7 @@ class GetPackages(Resource):
                 for package in request_body:
                     request_dict[package['Name']] = package['Version']
             except Exception:    
-                return {"message": "Error getting values from request body."}, 400
+                return {"message": "Error getting values from request body."}, 500
                 
             # Check for matching packages that exist in the registry
             package_results= []
@@ -354,11 +354,11 @@ class GetPackages(Resource):
             # Check to see if these Package name(s) actually exist in the registry
             if (len(package_results) == 0 ): # This request data doesn't exist
                 response = {
-                    "code": -1,
-                    "description": "Malformed request (e.g. no such packages).",
+                    "code": 200,
+                    "description": "Registry is empty.",
                     "message": "Package Name(s) do not match any packages currently in registry."
                 }
-                return response, 500
+                return response, 200, {"offset":offset}
             
             
             # Print out raw query results
@@ -400,11 +400,11 @@ class GetPackages(Resource):
             # Check to see if these Package name(s) actually exist in the registry
             if (len(query_output_match) == 0 ): # This request data doesn't exist
                 response = {
-                    "code": -1,
-                    "description": "Malformed request (e.g. no such packages).",
+                    "code": 200,
+                    "description": "No matches to return.",
                     "message": "Package Name(s) do not match any packages currently in registry."
                 }
-                return response, 500
+                return response, 200, {"offset":offset}
             
             # We have matches. Time to Paginate them:
             # Pagination process below
@@ -452,7 +452,7 @@ class GetPackages(Resource):
         # End of get_packages, successful exit!
         response = {
             "code": 200,
-            "message": "We made it to the end of get_packages."#package_results
+            "message": "No packages matched Query or the Registry is empty."#package_results
         }
         return response, 200, {"offset":offset} #TODO {}offset .header for testing #just randomly chose 200 
     
