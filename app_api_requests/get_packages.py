@@ -120,7 +120,7 @@ class GetPackages(Resource):
                 "message": json.dumps(page_list[0], sort_keys=True, indent=2) #package_results
             }
             '''
-            response = {json.dumps(page_list[0], sort_keys=True, indent=2)}
+            response = json.loads(json.dumps(page_list[0], sort_keys=True, indent=2))
             return response, 200, {"offset":offset}
 
 #------------------------------------------------------------------------------
