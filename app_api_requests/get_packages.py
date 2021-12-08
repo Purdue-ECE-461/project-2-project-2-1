@@ -74,10 +74,17 @@ class GetPackages(Resource):
             #print_to_stdout("json load QUERY RESULTS", json.loads(package_results))
             # Attempt to parse the query
             query_package_dict = {}
+            responseALL = []
             for package in package_results:
                 query_package_dict[package['Name']] = [package['Name'],package['Version'],package['ID']]
+                responseALL.append({
+                        "Name": package['Name'],
+                        "Version": package['Version'],
+                        "ID" : package['ID']})
+            print_to_stdout(responseALL)
             for key in query_package_dict.keys():    
                 print_to_stdout("QUERY DICT:",query_package_dict[key][0:3])
+                
             
             
 #------------------------------------------------------------------------------
