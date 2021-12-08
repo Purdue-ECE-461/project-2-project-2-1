@@ -76,17 +76,64 @@ class GetPackages(Resource):
             query_package_dict = {}
             responseALL = []
             for package in package_results:
-                query_package_dict[package['Name']] = [package['Name'],package['Version'],package['ID']]
+                #query_package_dict[package['Name']] = [package['Name'],package['Version'],package['ID']]
                 responseALL.append({
                         "Name": package['Name'],
                         "Version": package['Version'],
                         "ID" : package['ID']})
-            print_to_stdout(json.dumps(responseALL, sort_keys=True, indent=4))
-            for key in query_package_dict.keys():    
-                print_to_stdout("QUERY DICT:",query_package_dict[key][0:3])
+            print_to_stdout(json.dumps(responseALL, sort_keys=True, indent=2))
+            #for key in query_package_dict.keys():    
+            #    print_to_stdout("QUERY DICT:",query_package_dict[key][0:3])
+               
+            #remainder = len(responseALL) % 10
+            tens = len(responseALL) // 10
+            x = 0
+            if len(responseALL) % 10 == 0:
+                page_list = [[] for x in range(0,tens)]
+            else:
+                page_list = [[] for x in range(0,tens+1)]
+            print(page_list)
+            x = 0
+            i = 0
+            for package in responseALL:
+                if (i < 10):
+                    page_list[x].append(package)
+                    i+=1
+                else:
+                    i=0
+                    x+=1
+                    page_list[x].append(package)
+                    i+=1
+            
+            # Print page of offset
+            print_to_stdout(json.dumps(page_list[offset-1], sort_keys=True, indent=2))
+            '''
+            if len(responseALL) > 10:    
+                #remainder = len(responseALL) % 10
+                tens = len(responseALL) // 10
+                x = 0
+                if len(responseALL) % 10 == 0:
+                    page_list = [[] for x in range(0,tens)]
+                else:
+                    page_list = [[] for x in range(0,tens+1)]
+                print(page_list)
+                x = 0
+                i = 0
+                for package in responseALL:
+                    if (i < 10):
+                        page_list[x].append(package)
+                        i+=1
+                    else:
+                        i=0
+                        x+=1
+                        page_list[x].append(package)
+                        i+=1
                 
-            
-            
+                # Print page of offset
+                print_to_stdout(json.dumps(page_list[offset-1], sort_keys=True, indent=2))
+            else:
+                print_to_stdout(json.dumps(responseALL, sort_keys=True, indent=2))
+            '''
 #------------------------------------------------------------------------------
 # This separates the Whole Registry ^ above, with partial query below v           
 #------------------------------------------------------------------------------
