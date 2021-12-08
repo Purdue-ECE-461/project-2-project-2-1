@@ -9,9 +9,9 @@ def test_getpackages_empty_registry():
     clear_registry()
     
     header = generate_header()
-    query = {
+    query = [{
         "Name": '*' 
-    }
+    }]
 
     response = requests.post('http://127.0.0.1:8080/packages', headers=header, json=query)
     assert response.status_code == 200
