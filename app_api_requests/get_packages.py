@@ -33,7 +33,7 @@ class GetPackages(Resource):
     
         
         # Flask way to get offset
-        offset = request.args.get("offset")
+        offset = int(request.args.get("offset"))
         # Get the inputted "offset" from the URL path
         '''
         if request.view_args['offset']: # Check if offset is even there
