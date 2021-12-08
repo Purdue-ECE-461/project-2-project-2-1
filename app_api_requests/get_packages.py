@@ -7,7 +7,7 @@ import json
 import sys
 
 class GetPackages(Resource):
-    def post(self):
+    def get(self):
         request.get_data() # Get everything from the request/URL (path params)
 
         # User Authentication:
@@ -82,9 +82,11 @@ class GetPackages(Resource):
                     "message": "Package Name(s) do not match any packages currently in registry."
                 }
                 return response, 400
-            
-        print(package_results,file=sys.stdout)
-        pass
+        print("hello")    
+        response = {
+            package_results
+        }
+        return response, 200 #just randomly chose 200 
     
         # TODO - Take list of packages from above, and check the versions with
         # the request body versions (use regex to evaluate the versioning)
