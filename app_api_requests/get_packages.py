@@ -81,19 +81,29 @@ class GetPackages(Resource):
             for package_name in package_dict.keys():
                 query = datastore_client.query(kind='package')
                 query.add_filter("Name", "=", package_name)
-                
+                query.projection = ["Name", "Version"]
                 package_results.append(list(query.fetch()))
         
 
-            # Check to see if these Package name(s) actually exist in the registry
-            if (len(package_results) == 0 ): # This Combo doesn't exist
-                response = {
-                    "description": "Malformed request (e.g. no such packages).",
-                    "message": "Package Name(s) do not match any packages currently in registry."
-                }
-                return response, 400
-        # Print out query results
-        print_to_stdout(package_results)    
+        # Check to see if these Package name(s) actually exist in the registry
+        if (len(package_results) == 0 ): # This Combo doesn't exist
+            response = {
+                "description": "Malformed request (e.g. no such packages).",
+                "message": "Package Name(s) do not match any packages currently in registry."
+            }
+            return response, 400
+        
+        
+        # Print out raw query results
+        print_to_stdout("RAW QUERY RESULTS:",package_results) 
+        print_to_stdout("json load QUERY RESULTS", json.loads(''+package_results+''))
+        # Attempt to parse the query
+        for package in package_results:
+            print_to_stdout(package["Name"])
+            print_to_stdout(package["Version"])
+        
+        
+        # End of get_packages, successful exit!
         response = {
             "message": "We made it to the end of get_packages."#package_results
         }
