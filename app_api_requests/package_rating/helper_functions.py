@@ -6,8 +6,13 @@ def url_handler(url):
 
 def normalize_metric(raw_score, max_score):
     return min(raw_score / max_score, 1) 
-    
+
+# if we are running LOCALLY :  repo_clone_folder = "/tmp/repo_clone"  
+    # then all the tests pass
+# if we are running IN PRODUCTION :  repo_clone_folder = "/temp/repo_clone"
+    # then all the manualy tests with the ACTUAL "appspot.com" endpoint work
 repo_clone_folder = "/tmp/repo_clone"
+
 def clone_repo(url, log):
     # Clone repo to local folder
     # if: it exsts -- > remove it
