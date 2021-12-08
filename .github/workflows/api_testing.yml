@@ -54,8 +54,6 @@ jobs:
           python main.py &
           sleep 10
           coverage run -m pytest tests/ && coverage report -m
-      - name: Logging in
-        run: gcloud auth login
-        
+
       - name: Deploy to App Engine
         run: gcloud app deploy --quiet
