@@ -256,14 +256,15 @@ class GetPackages(Resource):
         request_body = json.loads(decoded_data)
         # For get_packages, request_body is a list of dictionaries that contain a
         # name and version (can be multiple versions....)
-        
+         full_registry = False
         # First check if request body is simply an asterisk, 
-        # means full registry of packages requested
-        full_registry = False
-        
-        for package in request_body:
-            if package["Name"] == "*":
-                full_registry = True
+        try:
+            # Populate Dictionary {Name : Version, ..., }
+            for package in request_body:
+                if package["Name"] == "*":
+                    full_registry = True# means full registry of packages requested
+        except Exception:    
+                return {"message": "Error getting values from request body."}, 500
         
         package_results_all = []
         if full_registry:   #if this returns true, query entire registry
