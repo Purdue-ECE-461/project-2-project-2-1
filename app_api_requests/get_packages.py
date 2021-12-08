@@ -11,7 +11,7 @@ def print_to_stdout(*a):
     
 class GetPackages(Resource):
     def post(self):
-        print("BEGIN GETPACKAGES?!?!?!?!?!?") #TODO remove
+        print("----------------BEGIN GETPACKAGES--------------") #TODO remove
         request.get_data() # Get everything from the request/URL (path params)
         
         # User Authentication:
@@ -115,11 +115,6 @@ class GetPackages(Resource):
                     print_to_stdout("Offset does not match results. Showing all results.")
                 print_to_stdout(json.dumps(page_list[0], sort_keys=True, indent=2))
             # Actual Output Response
-            '''response = {
-                "code": 200,
-                "message": json.dumps(page_list[0], sort_keys=True, indent=2) #package_results
-            }
-            '''
             response = json.loads(json.dumps(page_list[0], sort_keys=True, indent=2))
             return response, 200, {"offset":offset}
 
@@ -177,8 +172,10 @@ class GetPackages(Resource):
             for request_package_name in request_dict.keys():
                 for query_package in query_output:
                     if request_package_name in query_package.values():
-                        # this means that the package was found, so let's check it's version!
+                        print("match found, now compare versions from request & query")# this means that the package was found, so let's check it's version!
+                        print("Request Version:",request_dict[request_package_name],"-- Query Version:",query_package[request_package_name])
                         #if version_valid(query_output):
+                        
                         
                         pass
                     else:
