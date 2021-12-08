@@ -59,8 +59,29 @@ class GetPackages(Resource):
         package_results = []
         if full_registry:   #if this returns true, query entire registry
             query = datastore_client.query(kind='package')
-            query.projection = ["Name", "Version"]
+            query.projection = ["Name", "Version", "ID"]
             package_results = list(query.fetch())
+            
+            # Check to see if these Package name(s) actually exist in the registry
+            if (len(package_results) == 0 ): # This Combo doesn't exist
+                response = {
+                    "description": "Malformed request (e.g. no such packages).",
+                    "message": "Package Name(s) do not match any packages currently in registry."
+                }
+                return response, 400
+            # Print out raw query results
+            print_to_stdout("RAW QUERY RESULTS:",package_results) 
+            #print_to_stdout("json load QUERY RESULTS", json.loads(package_results))
+            # Attempt to parse the query
+            query_package_dict = {}
+            for package in package_results:
+                query_package_dict[package['Name']] = [package['Version'],package['ID']]
+                print_to_stdout("QUERY DICT:",package['Name'],package['Version'], package['ID'])
+            
+            
+#------------------------------------------------------------------------------
+# This separates the Whole Registry ^ above, with partial query below v           
+#------------------------------------------------------------------------------
         else:   # only query for the requested packages
             # Initialize empty request dictionaries so we can append
             # as many as are included in the GET request
@@ -100,7 +121,7 @@ class GetPackages(Resource):
         
         for key in query_package_dict.keys():
             print_to_stdout("Query Dict: ",key,':',query_package_dict[key])
-        if ~full_registry:
+        if full_registry == False:
             for key in package_dict.keys():
                 print_to_stdout("Request Dict: ",key,':',query_package_dict[key])
             
