@@ -50,30 +50,25 @@ class GetPackages(Resource):
         
         # First check if request body is simply an asterisk, 
         # means full registry of packages requested
-        package_results = []
+        full_registry = False
+        
         for package in request_body:
             if package["Name"] == "*":
-                #print("asterisk, return entire registry, check offset")
-                #return
-                # TODO - provide entire registry of packages
-                query = datastore_client.query(kind='package')
-                query.projection = ["Name", "Version"]
-                package_results = list(query.fetch())
+                full_registry = True
         
-        # Initialize empty request dictionaries so we can append
-        # as many as are included in the POST request
-        if package_results:  #if this returns true, then take the above values instead. otherwise, it is either empty or not all packages. both are fine
-            pass
-        else:
+        package_results = []
+        if full_registry:   #if this returns true, query entire registry
+            query = datastore_client.query(kind='package')
+            query.projection = ["Name", "Version"]
+            package_results = list(query.fetch())
+        else:   # only query for the requested packages
+            # Initialize empty request dictionaries so we can append
+            # as many as are included in the GET request
             package_dict = {}
-            package_names = []
-            package_versions = []
             try:
-                # For each package in the request, record the name and versions in a list
+                # Populate Dictionary {Name : Version, ..., }
                 for package in request_body:
                     package_dict[package['Name']] = package['Version']
-                    package_names.append(package['Name'])
-                    package_versions.append(package['Version'])
             except Exception:    
                 return {"message": "Error getting values from request body."}, 400
                 
@@ -105,8 +100,12 @@ class GetPackages(Resource):
         
         for key in query_package_dict.keys():
             print_to_stdout("Query Dict: ",key,':',query_package_dict[key])
-        for key in package_dict.keys():
-            print_to_stdout("Request Dict: ",key,':',query_package_dict[key])
+        if ~full_registry:
+            for key in package_dict.keys():
+                print_to_stdout("Request Dict: ",key,':',query_package_dict[key])
+            
+        if offset:
+            print_to_stdout("Offset=",offset)
         # End of get_packages, successful exit!
         response = {
             "message": "We made it to the end of get_packages."#package_results
