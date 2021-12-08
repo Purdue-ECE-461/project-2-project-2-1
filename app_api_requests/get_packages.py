@@ -166,14 +166,15 @@ class GetPackages(Resource):
                             "ID" : package['ID']})
                 #query_output[package['Name']] = package['Version']
                 #print_to_stdout("",package['Name'],package['Version'])
-            print_to_stdout("Query Dictionary Here:")
-            for package in query_output:
-                print_to_stdout(package)
-            # HERE IS WHERE WE PUT IN THE SEMANTIC VERSIONING -- 
+            #print_to_stdout("Query Dictionary Here:")
+            #for package in query_output:
+            #    print_to_stdout(package)
+            
+            # HERE IS WHERE WE PUT IN THE SEMANTIC VERSIONING  
             # Check the query output, a list of dictionaries that each contain a package from our registry
             # The versions in the registry need to be checked to see if they match the version request
             # So we need to match up the 
-            '''
+            
             query_output_match = []
             for request_package_name in request_dict.keys():
                 for query_package in query_output:
@@ -188,7 +189,7 @@ class GetPackages(Resource):
                         # this means that the package was not found, no need to check it. it won't be included in the final
                         pass
                 
-            '''
+            
             # Marking
             '''
             for key in query_output.keys():
