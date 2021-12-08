@@ -224,7 +224,10 @@ class GetPackages(Resource):
         print("----------------BEGIN GETPACKAGES--------------") #TODO remove
         request.get_data() # Get everything from the request/URL (path params)
         # Get the offset from request url
-        offset = int(request.args.get("offset"))
+        if request.args.get("offset"):
+            offset = int(request.args.get("offset"))
+        else:
+            offset = 0 # No offset provided, default is 0
         
         # User Authentication:
         auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
