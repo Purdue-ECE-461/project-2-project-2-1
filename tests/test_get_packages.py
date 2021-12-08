@@ -15,6 +15,7 @@ def test_getpackages_empty_registry():
 
     response = requests.post('http://127.0.0.1:8080/packages', headers=header, json=query)
     assert response.status_code == 200
+    print(response.content)
     
 """
 def test_getpackages_full_registry():
