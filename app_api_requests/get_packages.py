@@ -98,11 +98,15 @@ class GetPackages(Resource):
         print_to_stdout("RAW QUERY RESULTS:",package_results) 
         #print_to_stdout("json load QUERY RESULTS", json.loads(package_results))
         # Attempt to parse the query
+        query_package_dict = {}
         for package in package_results:
-            print_to_stdout(package["Name"])
-            print_to_stdout(package["Version"])
+            query_package_dict[package['Name']] = package['Version']
+            #print_to_stdout("",package['Name'],package['Version'])
         
-        
+        for key in query_package_dict.keys():
+            print_to_stdout("Query Dict: ",key,':',query_package_dict[key])
+        for key in package_dict.keys():
+            print_to_stdout("Request Dict: ",key,':',query_package_dict[key])
         # End of get_packages, successful exit!
         response = {
             "message": "We made it to the end of get_packages."#package_results
