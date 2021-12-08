@@ -272,7 +272,7 @@ curl -i --location --request PUT 'http://127.0.0.1:8080/register/ece461defaultad
 Get Packages:
 From Postman sample:
 
-curl -i --location --request GET 'http://127.0.0.1:8080/packages?offset=10' \
+curl -i --location --request POST 'http://127.0.0.1:8080/packages?offset=10' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
 --data-raw '[
   {
@@ -286,7 +286,7 @@ curl -i --location --request GET 'http://127.0.0.1:8080/packages?offset=10' \
 ]'
 
 Nick Test Case for "*":
-curl -i --location --request GET 'http://127.0.0.1:8080/packages?offset=10' \
+curl -i --location --request POST 'http://127.0.0.1:8080/packages?offset=10' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
 --data-raw '[
   {

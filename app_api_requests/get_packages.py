@@ -131,7 +131,7 @@ class GetPackages(Resource):
                 return {"message": "Error getting values from request body."}, 400
                 
             # Check for matching packages that exist in the registry
-           package_results= []
+            package_results= []
             for package_name in request_dict.keys():
                 query = datastore_client.query(kind='package')
                 query.add_filter("Name", "=", package_name)
@@ -171,7 +171,7 @@ class GetPackages(Resource):
                 for query_package in query_output:
                     if request_package_name in query_package.values():
                         # this means that the package was found, so let's check it's version!
-                        if version_valid(query_output)
+                        #if version_valid(query_output):
                         
                         pass
                     else:
