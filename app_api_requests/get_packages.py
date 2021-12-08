@@ -172,8 +172,8 @@ class GetPackages(Resource):
             for request_package_name in request_dict.keys():
                 for query_package in query_output:
                     if request_package_name in query_package.values():
-                        print("match found, now compare versions from request & query")# this means that the package was found, so let's check it's version!
-                        print("Request Version:",request_dict[request_package_name],"-- Query Version:",query_package[request_package_name])
+                        print_to_stdout("match found, now compare versions from request & query")# this means that the package was found, so let's check it's version!
+                        print_to_stdout("Request Version:",request_dict[request_package_name],"-- Query Version:",query_package[request_package_name])
                         #if version_valid(query_output):
                         
                         
