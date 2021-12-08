@@ -137,7 +137,7 @@ class GetPackages(Resource):
             for package_name in request_dict.keys():
                 query = datastore_client.query(kind='package')
                 query.add_filter("Name", "=", package_name)
-                query.projection = ["Name", "Version", "ID"]
+                #query.projection = ["Name", "Version", "ID"]
                 package_results.append(list(query.fetch()))
         
 
@@ -163,7 +163,9 @@ class GetPackages(Resource):
                         "ID" : package['ID']})
                 #query_output[package['Name']] = package['Version']
                 #print_to_stdout("",package['Name'],package['Version'])
-            
+            print_to_stdout("Query Dictionary Here:")
+            for package in query_output:
+                print_to_stdout(package)
             # HERE IS WHERE WE PUT IN THE SEMANTIC VERSIONING -- 
             # Check the query output, a list of dictionaries that each contain a package from our registry
             # The versions in the registry need to be checked to see if they match the version request
