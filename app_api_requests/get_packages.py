@@ -57,6 +57,7 @@ class GetPackages(Resource):
                 #return
                 # TODO - provide entire registry of packages
                 query = datastore_client.query(kind='package')
+                query.projection = ["Name", "Version"]
                 package_results = list(query.fetch())
         
         # Initialize empty request dictionaries so we can append
@@ -80,6 +81,7 @@ class GetPackages(Resource):
             for package_name in package_dict.keys():
                 query = datastore_client.query(kind='package')
                 query.add_filter("Name", "=", package_name)
+                
                 package_results.append(list(query.fetch()))
         
 
