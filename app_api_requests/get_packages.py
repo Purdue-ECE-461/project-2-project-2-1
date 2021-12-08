@@ -193,10 +193,10 @@ class GetPackages(Resource):
         
         # End of get_packages, successful exit!
         response = {
-            "header": "offset:" offset,
+            "code": 200,
             "message": "We made it to the end of get_packages."#package_results
         }
-        return response, 200 #TODO {}offset .header for testing #just randomly chose 200 
+        return response, 200, {"offset":offset} #TODO {}offset .header for testing #just randomly chose 200 
     
         # TODO - Take list of packages from above, and check the versions with
         # the request body versions (use regex to evaluate the versioning)
