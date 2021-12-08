@@ -5,10 +5,220 @@ from flask import request
 
 import json
 import sys
-
+import re
+#------------------------------------------------------------------------------
 def print_to_stdout(*a):
     print(*a, file = sys.stdout)
+#------------------------------------------------------------------------------
+def version_valid_hyphenated_inclusive_upper(request_version, query_version):
+    print("inclusive range (-)", request_version)
+    # Pad the query version with zeros as necessary for comparison purposes
+    query_version_list = query_version.split('.')
+    while(len(query_version_list) < 3):
+        query_version_list.append("0")
+    # now we know that the request_version is of the form x-x, where x could be 1, 1.0, 1.0.0, etc.
+    bounds = [bound.split('.') for bound in request_version.split('-')]
+    print(bounds)
+    # Make sure we don't do any list out of bounds, check length
+    if len(bounds) != 2:
+        return False
+    for bound in bounds:
+        while(len(bound) < 3):
+            bound.append("0")
+    print("new method for bounds- lower:"+'.'.join(bounds[0])+" upper:"+'.'.join(bounds[1]))
+    # Now check if queried version is between the bounds of the request
+    if '.'.join(bounds[0]) <= '.'.join(query_version_list) and '.'.join(query_version_list) <= '.'.join(bounds[1]):
+        return True
+    # not in bounds, not a match
+    return False
+#------------------------------------------------------------------------------
+def version_valid_hyphenated_exclusive_upper(request_version, query_version):
+    print("exclusive range (-)", request_version)
+    # Pad the query version with zeros as necessary for comparison purposes
+    query_version_list = query_version.split('.')
+    while(len(query_version_list) < 3):
+        query_version_list.append("0")
+    # now we know that the request_version is of the form x-x, where x could be 1, 1.0, 1.0.0, etc.
+    bounds = [bound.split('.') for bound in request_version.split('-')]
+    print(bounds)
+    # Make sure we don't do any list out of bounds, check length
+    if len(bounds) != 2:
+        return False
+    for bound in bounds:
+        while(len(bound) < 3):
+            bound.append("0")
+    print("new method for bounds- lower:"+'.'.join(bounds[0])+" upper:"+'.'.join(bounds[1]))
+    # Now check if queried version is between the bounds of the request
+    if '.'.join(bounds[0]) <= '.'.join(query_version_list) and '.'.join(query_version_list) < '.'.join(bounds[1]):
+        return True
+    # not in bounds, not a match
+    return False
+#------------------------------------------------------------------------------
+def version_valid(request_version, query_version):
+    print("Request Version:"+request_version+" -- Query Version:"+query_version)
     
+    # Search versions for alphabet characters, we aren't prepared to see those
+    if re.search("[a-zA-Z]",request_version):
+        # Invalid request version. Valid version only contains number digits and periods (i.e., "1.2.34")
+        return False
+    if re.search("[a-zA-Z]",query_version):
+        # Invalid query version. Valid version only contains number digits and periods (i.e., "1.2.34")
+        return False    
+    
+    # Now begin determining if the versions are valid (-/~/^/x.x.x are the options for comparison)
+    if re.search("\-", request_version):
+        if version_valid_hyphenated_inclusive_upper(request_version, query_version):
+            return True
+    elif re.search("\^", request_version):
+        print("changes that do not modify the leftmost nonzero range (^)", request_version)
+        # Similar to tilde in complexity below
+        # Convert to a lower and upper bound
+        # to compare with our query
+        # ^1     -> 1     -> >= 1.0.0 and < 2.0.0
+        # ^1.0   -> 1.0   -> >= 1.0.0 and < 1.1.0
+        # ^1.0.0 -> 1.0.0 -> >= 1.0.0 and <1.1.0
+        request_version_clean = request_version.strip('^')
+        request_version_list = request_version.strip('^').split('.')
+        print("request_version_list:",request_version_list)
+        
+        # Check length of list to make sure we have the proper length, otherwise fill with zeros
+        # Make sure we don't do any list out of bounds, check length
+        if len(request_version_list) > 3:
+            return False
+        while(len(request_version_list) < 3):
+                request_version_list.append("0")
+                
+        if '.'.join(request_version_list) == "0.0.0":
+            #lower_bound = "0.0.0" & upper_bound = "0.0.0"
+            if version_valid_hyphenated_exclusive_upper('.'.join(request_version_list)+'-'+'.'.join(request_version_list), query_version):
+                return True
+            else:
+                return False
+        # Compute lower bound from request
+        lower_bound_list = request_version.strip('^').split('.')
+        # lower bound = original request version
+        if len(lower_bound_list) == 1:
+            # This means we only have 1 digit to check
+            while(len(lower_bound_list) < 3):
+                lower_bound_list.append("0")
+        elif len(lower_bound_list) == 2:
+            while(len(lower_bound_list) < 3):
+                lower_bound_list.append("0")
+        elif len(lower_bound_list) == 3:
+            pass
+        else:
+            # The request version was not a valid input, fail to match
+            return False
+        
+        # Compute upper bound from request
+        upper_bound_list = request_version.strip('^').split('.')
+        if len(upper_bound_list) == 1:
+            # We already covered the zero case above, so its a number > 0
+            # Then the upper limit is another 1 up, same as tilde
+            while(len(upper_bound_list) < 3):
+                upper_bound_list.append("0")
+            upper_bound_list[0] = str(int(upper_bound_list[0])+1)
+        elif len(upper_bound_list) == 2:
+            # here we break from tilde (different logic)
+            # now we need to check the digits (only 2 here) for zeros.
+            # we only need to check left-most since there are two, and we 
+            # already covered the 0.0 case, so if left digit isn't zero,
+            # then the rightmost can't also be.
+            while(len(upper_bound_list) < 3):
+                upper_bound_list.append("0")
+            if upper_bound_list[0] == "0":
+                upper_bound_list[1] = str(int(upper_bound_list[1])+1)
+            else:
+                upper_bound_list[0] = str(int(upper_bound_list[0])+1)
+        elif len(upper_bound_list) == 3:
+            # split "X.X.X" into list of each ["X","X","X"] for parsing
+            if upper_bound_list[0]  == "0" and upper_bound_list[1] == "0": #"0.0.X", already covered "0.0.0" above
+                upper_bound_list[1] = "1"
+                upper_bound_list[2] = "0"
+            elif upper_bound_list[0] == "0" and upper_bound_list[1] != "0": #"0.X.X"
+                upper_bound_list[1] = str(int(upper_bound_list[1])+1)
+                upper_bound_list[2] = "0"
+            elif upper_bound_list[0] != "0" and upper_bound_list[1] == "0": #"X.0.X"
+                upper_bound_list[0] = str(int(upper_bound_list[0])+1)
+                upper_bound_list[1] = "0"
+                upper_bound_list[2] = "0"
+            elif upper_bound_list[0] != "0" and upper_bound_list[1] != "0": #"X.X.X":
+                upper_bound_list[0] = str(int(upper_bound_list[0])+1)
+                upper_bound_list[1] = "0"
+                upper_bound_list[2] = "0"
+            else:    
+                return False
+            
+        else:
+            return False
+
+        print("Cleaned Request Version:"+request_version_clean)
+        print("Lower Bound Version:"+'.'.join(lower_bound_list))
+        print("Upper Bound Version:"+'.'.join(upper_bound_list))
+        new_request_bounds = '.'.join(lower_bound_list)+'-'+'.'.join(upper_bound_list)
+        print("New Request Bounds:", new_request_bounds)
+        if version_valid_hyphenated_exclusive_upper(new_request_bounds, query_version):
+            return True
+
+    elif re.search("~", request_version):
+        print("patch or minor version (rightmost) (~)", request_version)
+        # Need to take request in, remove tilde, then evaluate the version
+        # We need to convert the tilde version into a lower and an upper bound
+        # to compare our query with (basically convert the tilde to a hyphen range)
+        # ~1     -> 1     -> >= 1.0.0 and < 2.0.0
+        # ~1.0   -> 1.0   -> >= 1.0.0 and < 1.1.0
+        # ~1.0.0 -> 1.0.0 -> >= 1.0.0 and <1.1.0
+        request_version_clean = request_version.strip('~')
+        
+        # Compute lower bound from request
+        lower_bound_list = request_version.strip('~').split('.')
+        if len(lower_bound_list) == 1:
+            # This means we only have 1 digit to check
+            while(len(lower_bound_list) < 3):
+                lower_bound_list.append("0")
+        elif len(lower_bound_list) == 2:
+            while(len(lower_bound_list) < 3):
+                lower_bound_list.append("0")
+        elif len(lower_bound_list) == 3:
+            pass
+        else:
+            # The request version was not a valid input, fail to match
+            return False
+        # Now to compute upper bound
+        upper_bound_list = request_version.strip('~').split('.')
+        if len(upper_bound_list) == 1:
+            # Then the upper limit is another 1 up, same as tilde
+            while(len(upper_bound_list) < 3):
+                upper_bound_list.append("0")
+            upper_bound_list[0] = str(int(upper_bound_list[0])+1)     
+        elif len(upper_bound_list) == 2:
+            while(len(upper_bound_list) < 3):
+                upper_bound_list.append("0")
+            upper_bound_list[1] = str(int(upper_bound_list[1])+1)
+        elif len(upper_bound_list) == 3:
+            upper_bound_list[2] = "0"
+            upper_bound_list[1] = str(int(upper_bound_list[1])+1)
+        else:
+            # The request version was not a valid input, fail to match
+            return False
+        
+        print("Cleaned Request Version:"+request_version_clean)
+        print("Lower Bound Version:"+'.'.join(lower_bound_list))
+        print("Upper Bound Version:"+'.'.join(upper_bound_list))
+        new_request_bounds = '.'.join(lower_bound_list)+'-'+'.'.join(upper_bound_list)
+        print("New Request Bounds:", new_request_bounds)
+        if version_valid_hyphenated_exclusive_upper(new_request_bounds, query_version):
+            return True
+    else:
+        # This is an exact version request
+        # Need to be careful of 1.0.0 == 1.0 == 1
+        # Adjust those IN the 
+        #request_version_list = request_version.strip('^').split('.')  
+        if version_valid_hyphenated_inclusive_upper(request_version+'-'+request_version,query_version):
+            return True
+    # Matching has failed, return False
+    return False
+#-----------------------------------------------------------------------------
 class GetPackages(Resource):
     def post(self):
         print("----------------BEGIN GETPACKAGES--------------") #TODO remove
@@ -181,24 +391,60 @@ class GetPackages(Resource):
                     if request_package_name in query_package.values():
                         print_to_stdout("match found, now compare versions from request & query")# this means that the package was found, so let's check it's version!
                         print_to_stdout("Request Version:",request_dict[request_package_name],"-- Query Version:",query_package["Version"])
-                        #if version_valid(query_output):
-                        
-                        
-                        pass
+                        if version_valid(request_dict[request_package_name],query_package["Version"]):
+                            query_output_match.append(query_package)
                     else:
-                        # this means that the package was not found, no need to check it. it won't be included in the final
+                        #TODO this means no match is found, could put logging here TODO
                         pass
+            # Are there any matches to return. i.e., is the match list empty
+            # Check to see if these Package name(s) actually exist in the registry
+            if (len(query_output_match) == 0 ): # This request data doesn't exist
+                response = {
+                    "code": -1,
+                    "description": "Malformed request (e.g. no such packages).",
+                    "message": "Package Name(s) do not match any packages currently in registry."
+                }
+                return response, 500
+            
+            # We have matches. Time to Paginate them:
+            # Pagination process below
+            #remainder = len(query_output_match) % 10
+            tens = len(query_output_match) // 10
+            x = 0
+            if len(query_output_match) % 10 == 0:
+                page_list = [[] for x in range(0,tens)]
+            else:
+                page_list = [[] for x in range(0,tens+1)]
+            print(page_list)
+            x = 0
+            i = 0
+            for package in query_output_match:
+                if (i < 10):
+                    page_list[x].append(package)
+                    i+=1
+                else:
+                    i=0
+                    x+=1
+                    page_list[x].append(package)
+                    i+=1
+            # Print Out response
+            if (offset*10) < len(query_output_match):
+                if ((offset+1)*10) < len(query_output_match):
+                    print_to_stdout("Showing Page #"+str(offset+1)+". For next page, offset="+str(offset+1))
+                else:
+                    print_to_stdout("Showing Page #"+str(offset+1)+". This is the Final Page of Results.")
+                print_to_stdout(json.dumps(page_list[offset], sort_keys=True, indent=2))
+            else:
+                if 10 < len(query_output_match):
+                    print_to_stdout("Offset does not match results. Showing page 1 instead."+" For next page, offset="+str(1))
+                else:
+                    print_to_stdout("Offset does not match results. Showing all results.")
+                print_to_stdout(json.dumps(page_list[0], sort_keys=True, indent=2))
+            # Actual Output Response
+            response = json.loads(json.dumps(page_list[0], sort_keys=True, indent=2))
+            return response, 200, {"offset":offset}                                
                 
-            
-            # Marking
-            '''
-            for key in query_output.keys():
-                print_to_stdout("Query Dict: ",key,':',query_output[key])
-            if full_registry == False:
-                for key in request_dict.keys():
-                    print_to_stdout("Request Dict: ",key,':',query_output[key])
-            '''   
-            
+        #----------------------------------------------------------------------
         if offset: # TODO remove this
             print_to_stdout("Offset=",offset)
         
@@ -220,4 +466,7 @@ class GetPackages(Resource):
         # TODO - UNIT Testing
         
         # TODO - Logging
+        
+        # TODO - More intuitive offset response, we are barebones right now.
+        # TODO - Refactor Pagination into a helper function
         
