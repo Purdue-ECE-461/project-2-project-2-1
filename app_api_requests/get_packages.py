@@ -96,7 +96,7 @@ class GetPackages(Resource):
         
         # Print out raw query results
         print_to_stdout("RAW QUERY RESULTS:",package_results) 
-        print_to_stdout("json load QUERY RESULTS", json.loads(''+package_results+''))
+        #print_to_stdout("json load QUERY RESULTS", json.loads(package_results))
         # Attempt to parse the query
         for package in package_results:
             print_to_stdout(package["Name"])
