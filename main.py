@@ -107,7 +107,7 @@ api.add_resource(RatePackage, '/package/<string:id>/rate', endpoint='/package_ra
 api.add_resource(Reset, '/reset', endpoint='/reset')
 api.add_resource(Authenticate, '/authenticate')
 api.add_resource(Register, '/register/<string:current_user_name>')
-api.add_resource(GetPackages, '/packages', '/packages?<string:offset>') #TODO: add endpoint? Also NOTE: "?offset=2" is optional
+api.add_resource(GetPackages, '/packages', '/packages?<string:offset>') # Note: "?offset=2" is optional
 logger.info('Resources added, app is running')
 
 
