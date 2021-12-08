@@ -6,8 +6,11 @@ from flask import request
 import json
 import sys
 
+def print_to_stdout(*a):
+    print(*a, file = sys.stdout)
+    
 class GetPackages(Resource):
-    def get(self):
+    def get(self, offset):
         request.get_data() # Get everything from the request/URL (path params)
 
         # User Authentication:
@@ -27,13 +30,17 @@ class GetPackages(Resource):
             return response, 400
         # else, the user is in the database. Carry on.
     
-         # Get the inputted "offset" from the URL path
+        
+        # Flask way to get offset
+        offset = request.args.get("offset")
+        # Get the inputted "offset" from the URL path
+        '''
         if request.view_args['offset']: # Check if offset is even there
             offset_string = request.view_args['offset'] # should be of the form "?offset=2"
             offset = int(offset_string.split('=')[1]) # if it is there, second part should be the actual offset number
         else:
             offset = 0 # offset 0 means page 1, offset 1 means page 2, etc.,
-        
+        '''
         # Get data from the request body
         decoded_data = request.data.decode("utf-8") # Decode body of the data
         request_body = json.loads(decoded_data)
