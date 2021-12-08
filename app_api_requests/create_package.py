@@ -192,10 +192,25 @@ class CreatePackage(Resource):
             logger.info("Package URL is empty. Gettting the URL from the package.json ...")
             # base64 Content-string --> Zip File ('decoded_content.zip')
             try:
+                logger.info("getting decoded_bytes...")
                 decoded_bytes = base64.b64decode(package_content)
-                file_decoded = open('decoded_content.zip', 'wb') # open a new empty file, to write to
-                file_decoded.write(decoded_bytes)
-                file_decoded.close()
+                logger.info(decoded_bytes)
+                
+                # create a /tmp directory
+                path = "/tmp"
+                logger.info("checking if directory exists...")
+                if not os.path.exists(path):
+                    logger.info("creating directory...")
+                    os.makedirs(path)
+
+                filename = "decoded_content.zip"
+                logger.info("creating the decoded_content.zip in the /tmp directory...")
+                with open(os.path.join(path, filename), 'wb') as file_decoded:
+                    logger.info("writing to file...")
+                    file_decoded.write(decoded_bytes)
+                    logger.info("closing file...")
+                    file_decoded.close()
+                    # "decoded_content.zip" has the repo_folder that has the package.json
             except Exception:
                 logger.error("Unable to decode the Content-string from the request body.")
                 response = {
@@ -204,11 +219,12 @@ class CreatePackage(Resource):
                 return response, 400
 
             # Zip File ('decoded_content.zip') --> Get the "package.json" from it
-            logger.info("Successfully decoded content string and now have the file: decoded_content.zip in our current directory.")
-            logger.info("Unzipping the decoded_content.zip ... ")
+            logger.info("Successfully decoded content string and now have the file: decoded_content.zip in /tmp")
+            logger.info("Unzipping the /tmp/decoded_content.zip ... ")
             try: 
                 names = []
-                with ZipFile('decoded_content.zip', 'r') as zipObj:
+                with ZipFile('/tmp/decoded_content.zip', 'r') as zipObj:
+                    logger.info("Got the zipOj. Going through the folders to get the one with package.json... ")
                     for info in zipObj.infolist():
                         if (info.is_dir()):
                             if "_" not in (info.filename):
@@ -218,14 +234,21 @@ class CreatePackage(Resource):
                     logger.info(names)
                     logger.info("Number of folders in the zipfile (should be 1): " + str(len(names)) ) # THIS VALUE SHOULD BE 1
                     
-                    # Copy the file from the Zipfile --> Save it to our current directory
+                    # Copy the file from the Zipfile --> Save it to our tmp/ folder
                     logger.info("Folder we go into to find the package.json: " + str(names[0]))
-                    source = zipObj.open(names[0]+"package.json")
-                    target = open("package.json", "wb")
-                    with source, target:
+                    
+                    logger.info("Getting: source = "+ str(names[0])+"package.json" )
+                    source = zipObj.open(str(names[0])+"package.json")
+                    
+                    logger.info("Getting: target = "+ str(names[0])+"package.json" )
+                    # target = open( str(names[0])+"package.json" , "wb")
+                    with open( '/tmp/package_recovered.json', "wb") as target:
+                        logger.info("Copying the soruce file to the target file...")
+                        # with source, target:
                         shutil.copyfileobj(source, target)
+                        logger.info("Successfully got the package.json. It's in the /tmp/package_recovered.json ")
             except Exception:
-                logger.error("Unable to get the package.json from the decoded_content.zip. May not be a package.json.")
+                logger.info("Package uploaded. But unable to get the package.json from the decoded_content.zip. May not be a package.json.")
                 # Add entity to the registry. Without updating the scores from "-1"
                 datastore_client.put(package_entity)                
                 response = {
@@ -236,28 +259,58 @@ class CreatePackage(Resource):
                 }
                 # Delete the "decoded_content.zip" file
                 # Everything was successful, we don't need it. 
-                logger.info("Deleting the decoded_content.zip file... ")
-                os.remove("decoded_content.zip") # removes a file.
+                # Delete the Repo FOLDER (that we just created) from our current directory
+                logger.info("Deleting the conents in /tmp directory...")
+                logger.info("Deleting .zip ... ")
+                os.remove('/tmp/decoded_content.zip')
+                try:
+                    logger.info("Deleting .json ... ")
+                    os.remove('/tmp/package_recovered.json')
+                except Exception: #try to delete it in case we got to here
+                    return response, 201
+                
                 return response, 201
                 
             # "package.json" --> get the URL
+            # technically ... it's already TARGET from above ^^ 
             try:
-                with open("package.json") as json_file:
+                with open('/tmp/package_recovered.json') as json_file:
                     logger.info("Decoding the package.json... ")
                     data = json.load(json_file) # data holds everything
+
+                    logger.info("Getting URL via array indexing... ")
                     url = data['repository']['url']
+                    
+                    logger.info("Removing the git+ off the start of the URL... ")
                     package_url = url[4:] # trim the "git+" off the start of the URL
+                    
                     size = len(package_url)
+                    logger.info("Removing the .git off the end of the URL.. ")
                     package_url = package_url[:size - 4] # trim the ".git" off the end of the URL
+                    
+                    logger.info("Saving the retreived URL to the package_entity...")
                     package_entity['URL'] = package_url
+
                     logger.info("Package URL from package.json: " + package_url)
 
                     # Delete the "decoded_content.zip" file and "package.json" from our current directory.
                     # Everything was successful, we don't need it. 
-                    logger.info("Deleting the package.json... ")
-                    os.remove("package.json") # removes a file.
-                    logger.info("Deleting the decoded_content.zip file... ")
-                    os.remove("decoded_content.zip") # removes a file.
+                    logger.info("Deleting content in the /tmp folder")
+                    
+                    """logger.info("Before removal:  " + os.listdir("/tmp"))
+                    shutil.rmtree('/tmp/*')
+                    logger.info("After removal:  " + os.listdir("/tmp"))"""
+
+                    logger.info("Deleting .json ... ")
+                    os.remove('/tmp/package_recovered.json')
+
+                    logger.info("Deleting .zip ... ")
+                    os.remove('/tmp/decoded_content.zip')
+
+                    
+                    # os.remove("package.json") # removes a file.
+                    # logger.info("Deleting the decoded_content.zip file... ")
+                    # os.remove("decoded_content.zip") # removes a file.
 
                     logger.info("Package URL successfully gotten from package.json : " + package_url )
 

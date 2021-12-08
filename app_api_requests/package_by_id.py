@@ -27,6 +27,17 @@ logger = logging.getLogger(__name__)
 def print_to_stdout(*a):
     print(*a, file = sys.stdout)
 
+def clone_repo_diff(url):
+    repo_clone_folder = "/tmp/repo_clone"
+    # Clone repo to local folder
+    # if: it exsts -- > remove it
+    if ( os.path.isdir(repo_clone_folder) ):
+        shutil.rmtree(repo_clone_folder)
+    
+    os.system("git clone " + url + " " + repo_clone_folder)
+    
+    return repo_clone_folder
+
 
 # @api.resource('/package/<string:id>')
 class PackageById(Resource): # also why is this a POST request
@@ -78,7 +89,7 @@ class PackageById(Resource): # also why is this a POST request
         except Exception:
             logger.error("Error getting values from request body.")
             response = {
-                "message": "Error getting values from request body."
+                "message": "Error getting values from request body. Include Content, URL, and JSProgram when updating package."
             }
             return response, 400
 
@@ -154,7 +165,7 @@ class PackageById(Resource): # also why is this a POST request
                 'message': "Exception thrown while updating package"
             }
 
-            return response, 200
+            return response, 400
 
         # Update entity in the registry
         datastore_client.put(package_entity)
@@ -236,26 +247,33 @@ class PackageById(Resource): # also why is this a POST request
                 # Use the "URL" field to clone repo
                 logger.info("Getting the repo_name from the package_url...")
                 repo_name = package_url.split('.git')[0].split('/')[-1]
-                logger.error("repo_name: "+ repo_name)
+                logger.info("repo_name: "+ repo_name)
 
                 logger.info("Cloning repo...")
-                if not( os.path.isdir(repo_name) ): # if it's NOT in the current directory already
-                    Repo.clone_from(package_url, repo_name) # creates a FOLDER of the cloned repo
+                repo_folder = clone_repo_diff(package_url) # repo_clone
+                #if not( os.path.isdir(repo_name) ): # if it's NOT in the current directory already
+                #    Repo.clone_from(package_url, repo_name) # creates a FOLDER of the cloned repo
 
                 # Get the folder with repository --> zip file
                 logger.info("Zipping the folder with the repo...")
-                if not(os.path.isfile(repo_name+".zip")): # if it's NOT in the current directory already
-                    shutil.make_archive(repo_name, 'zip')  # creates a ZIPFILE of the repo
+                #if not(os.path.isfile(repo_name+".zip")): # if it's NOT in the current directory already
+                    # shutil.make_archive(repo_name, 'zip')  # creates a ZIPFILE of the repo
+                shutil.make_archive( '/tmp/repo_clone', 'zip', '/tmp', 'repo_clone')
 
                 # Encode the zipfile in base64
-                logger.error("Converting the zipfile to a base64 encoded string... (encoding zipfile)")
-                zip_file = repo_name +".zip"
-                with open(zip_file, "rb") as f:
+                logger.info("Converting the zipfile to a base64 encoded string... (encoding zipfile)")
+                # zip_file = "repo_clone" +".zip"
+                logger.info("reading bytes...")
+                with open( '/tmp/repo_clone.zip', "rb") as f:
+                    logger.info("reading bytes...")
                     bytes = f.read()
+                    logger.info("Converting zip file to bytes...")
                     encode_string = base64.b64encode(bytes)
+                    logger.info("Converting zip file to txt (utf-8)...")
                     encode_string = encode_string.decode('utf-8')
 
                 # Add the encoded string to entity's Content field
+                logger.info("Repo has been cloned, zipped, and encoded")
                 package_content = encode_string
                 # print_to_stdout(encode_string)
 
@@ -263,8 +281,7 @@ class PackageById(Resource): # also why is this a POST request
                 # Delete the Repo.zip (that we just created) from our current directory
                 try:
                     logger.info("Deleting the repo_folder and the zip-file of it from current directory...")
-                    os.remove(zip_file) # removes a file.
-                    shutil.rmtree(repo_name) # deletes a directory/folder and all its contents.
+                    shutil.rmtree('/tmp/repo_clone') # deletes a directory/folder and all its contents.
                 except Exception:
                     logger.error("Error deleting the repo_folder and the zip-file of it from current directory...")
                     response = {
@@ -281,8 +298,7 @@ class PackageById(Resource): # also why is this a POST request
                 }
                 try:
                     logger.info("Deleting the repo_folder and the zip-file of it from current directory...")
-                    os.remove(zip_file) # removes a file.
-                    shutil.rmtree(repo_name) # deletes a directory/folder and all its contents.
+                    shutil.rmtree('/tmp/repo_clone') # deletes a directory/folder and all its contents.
                 except Exception: 
                     return response, 500 # if file and folder are already deleted it'll go here, all good.
                 return response, 500
@@ -306,23 +322,23 @@ class PackageById(Resource): # also why is this a POST request
                 }
             }
         except Exception:
-            logger.error("An error occurred while retrieving packag")
+            logger.error("An error occurred while forming response")
             response = {
                 "code": -1,
-                "message": "An error occurred while retrieving package",
+                "message": "An error occurred while forming response",
                 "description": "The specified ID has null/missing fields in the datastore"
             }
             try:
-                os.remove(zip_file) # removes a file.
-                shutil.rmtree(repo_name) # deletes a directory/folder and all its contents.
+                logger.info("Deleting the repo_folder and the zip-file of it from current directory...")
+                shutil.rmtree('/tmp/repo_clone') # deletes a directory/folder and all its contents.
             except Exception:
                 return response, 500 # if file and folder are already deleted it'll go here, all good.
             return response, 500
         
         # Return response body and code
         try:
-            os.remove(zip_file) # removes a file.
-            shutil.rmtree(repo_name) # deletes a directory/folder and all its contents.
+            logger.info("Deleting the repo_folder and the zip-file of it from current directory...")
+            shutil.rmtree('/tmp/repo_clone') # deletes a directory/folder and all its contents.
         except Exception:
             return response, 200 # if file and folder are already deleted it'll go here, all good.
 
