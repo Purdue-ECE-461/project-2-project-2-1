@@ -55,6 +55,4 @@ jobs:
           sleep 10
           coverage run -m pytest tests/ && coverage report -m
       - name: Deploy to App Engine
-        uses: google-github-actions/deploy-appengine@v0.2.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+        uses: google-github-actions/deploy-appengine@v0.4.0
