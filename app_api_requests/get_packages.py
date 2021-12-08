@@ -75,8 +75,9 @@ class GetPackages(Resource):
             # Attempt to parse the query
             query_package_dict = {}
             for package in package_results:
-                query_package_dict[package['Name']] = [package['Version'],package['ID']]
-                print_to_stdout("QUERY DICT:",package['Name'],package['Version'], package['ID'])
+                query_package_dict[package['Name']] = [package['Name'],package['Version'],package['ID']]
+            for key in query_package_dict.keys():    
+                print_to_stdout("QUERY DICT:",query_package_dict[key][0:3])
             
             
 #------------------------------------------------------------------------------
@@ -101,30 +102,30 @@ class GetPackages(Resource):
                 package_results.append(list(query.fetch()))
         
 
-        # Check to see if these Package name(s) actually exist in the registry
-        if (len(package_results) == 0 ): # This Combo doesn't exist
-            response = {
-                "description": "Malformed request (e.g. no such packages).",
-                "message": "Package Name(s) do not match any packages currently in registry."
-            }
-            return response, 400
-        
-        
-        # Print out raw query results
-        print_to_stdout("RAW QUERY RESULTS:",package_results) 
-        #print_to_stdout("json load QUERY RESULTS", json.loads(package_results))
-        # Attempt to parse the query
-        query_package_dict = {}
-        for package in package_results:
-            query_package_dict[package['Name']] = package['Version']
-            #print_to_stdout("",package['Name'],package['Version'])
-        
-        for key in query_package_dict.keys():
-            print_to_stdout("Query Dict: ",key,':',query_package_dict[key])
-        if full_registry == False:
-            for key in package_dict.keys():
-                print_to_stdout("Request Dict: ",key,':',query_package_dict[key])
+            # Check to see if these Package name(s) actually exist in the registry
+            if (len(package_results) == 0 ): # This Combo doesn't exist
+                response = {
+                    "description": "Malformed request (e.g. no such packages).",
+                    "message": "Package Name(s) do not match any packages currently in registry."
+                }
+                return response, 400
             
+            
+            # Print out raw query results
+            print_to_stdout("RAW QUERY RESULTS:",package_results) 
+            #print_to_stdout("json load QUERY RESULTS", json.loads(package_results))
+            # Attempt to parse the query
+            query_package_dict = {}
+            for package in package_results:
+                query_package_dict[package['Name']] = package['Version']
+                #print_to_stdout("",package['Name'],package['Version'])
+            
+            for key in query_package_dict.keys():
+                print_to_stdout("Query Dict: ",key,':',query_package_dict[key])
+            if full_registry == False:
+                for key in package_dict.keys():
+                    print_to_stdout("Request Dict: ",key,':',query_package_dict[key])
+                
         if offset:
             print_to_stdout("Offset=",offset)
         # End of get_packages, successful exit!
