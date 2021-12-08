@@ -156,13 +156,14 @@ class GetPackages(Resource):
             print_to_stdout("RAW QUERY RESULTS:",package_results) #TODO remove 
             #print_to_stdout("json load QUERY RESULTS", json.loads(package_results))
             # Attempt to parse the query
-            '''
+            
             query_output = []
-            for package in package_results:
-                query_output.append({
-                        "Name": package['Name'],
-                        "Version": package['Version'],
-                        "ID" : package['ID']})
+            for inner_list in package_results:
+                for package in inner_list:
+                    query_output.append({
+                            "Name": package['Name'],
+                            "Version": package['Version'],
+                            "ID" : package['ID']})
                 #query_output[package['Name']] = package['Version']
                 #print_to_stdout("",package['Name'],package['Version'])
             print_to_stdout("Query Dictionary Here:")
@@ -172,6 +173,7 @@ class GetPackages(Resource):
             # Check the query output, a list of dictionaries that each contain a package from our registry
             # The versions in the registry need to be checked to see if they match the version request
             # So we need to match up the 
+            '''
             query_output_match = []
             for request_package_name in request_dict.keys():
                 for query_package in query_output:
