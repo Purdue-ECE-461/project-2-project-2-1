@@ -114,7 +114,12 @@ class GetPackages(Resource):
                 else:
                     print_to_stdout("Offset does not match results. Showing all results.")
                 print_to_stdout(json.dumps(page_list[0], sort_keys=True, indent=2))
-            
+            # Actual Output Response
+            response = {
+                "code": 200,
+                "message": json.dumps(page_list[0], sort_keys=True, indent=2) #package_results
+            }
+            return response, 200, {"offset":offset}
 
 #------------------------------------------------------------------------------
 # This separates the Full Registry Query ^ above, with partial registry query below v           
