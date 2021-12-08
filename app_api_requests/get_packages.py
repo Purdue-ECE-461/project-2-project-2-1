@@ -223,6 +223,8 @@ class GetPackages(Resource):
     def post(self):
         print("----------------BEGIN GETPACKAGES--------------") #TODO remove
         request.get_data() # Get everything from the request/URL (path params)
+        # Get the offset from request url
+        offset = int(request.args.get("offset"))
         
         # User Authentication:
         auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
@@ -243,8 +245,8 @@ class GetPackages(Resource):
         # else, the user is in the database. Carry on.
     
         
-        # Get the offset from request url
-        offset = int(request.args.get("offset"))
+
+        
 
         # Get data from the request body
         decoded_data = request.data.decode("utf-8") # Decode body of the data
