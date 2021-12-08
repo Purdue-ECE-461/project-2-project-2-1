@@ -115,10 +115,12 @@ class GetPackages(Resource):
                     print_to_stdout("Offset does not match results. Showing all results.")
                 print_to_stdout(json.dumps(page_list[0], sort_keys=True, indent=2))
             # Actual Output Response
-            response = {
+            '''response = {
                 "code": 200,
                 "message": json.dumps(page_list[0], sort_keys=True, indent=2) #package_results
             }
+            '''
+            response = json.dumps(page_list[0], sort_keys=True, indent=2)
             return response, 200, {"offset":offset}
 
 #------------------------------------------------------------------------------
