@@ -256,7 +256,7 @@ class GetPackages(Resource):
         request_body = json.loads(decoded_data)
         # For get_packages, request_body is a list of dictionaries that contain a
         # name and version (can be multiple versions....)
-         full_registry = False
+        full_registry = False
         # First check if request body is simply an asterisk, 
         try:
             # Populate Dictionary {Name : Version, ..., }
