@@ -14,11 +14,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    name: Test
+  build_and_deploy:
+    name: Build and Deploy
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      INPUT_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -54,8 +54,7 @@ jobs:
           python main.py &
           sleep 10
           coverage run -m pytest tests/ && coverage report -m
-          
-
-
-#       - name: Deploy to App Engine
-#         run: gcloud app deploy --quiet
+      - name: Deploy to App Engine
+        uses: google-github-actions/deploy-appengine@v0.2.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
