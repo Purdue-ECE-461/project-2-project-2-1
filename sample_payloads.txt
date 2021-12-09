@@ -406,14 +406,6 @@ curl --location --request PUT 'https://ece461-project2.ue.r.appspot.com/register
 Paginated List of Packages:
 "200: Successfully returned list of packages"
 
-curl -i --location --request POST 'https://ece461-project2.ue.r.appspot.com/packages' \
---header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
---data-raw '[
-  {
-    "Name": "*"
-  }
-]'
-
 curl -i --location --request POST 'https://ece461-project2.ue.r.appspot.com/packages?offset=10' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
 --data-raw '[
