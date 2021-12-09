@@ -175,7 +175,7 @@ curl --location --request GET 'https://ece461-project2.ue.r.appspot.com/package/
 ---------------------------------------------------------------------------------------------------------------------------
 
 Update Package:
-"200: Successfuly updated package"
+"200: Successfully updated package"
 
 curl --location --request DELETE 'https://ece461-project2.ue.r.appspot.com/reset' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
@@ -233,7 +233,7 @@ curl --location --request PUT 'https://ece461-project2.ue.r.appspot.com/package/
 ---------------------------------------------------------------------------------------------------------------------------
 
 Delete Package:
-"200: Successfuly deleted package"
+"200: Successfully deleted package"
 
 curl --location --request DELETE 'https://ece461-project2.ue.r.appspot.com/reset' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
@@ -266,7 +266,7 @@ curl --location --request DELETE 'https://ece461-project2.ue.r.appspot.com/packa
 ---------------------------------------------------------------------------------------------------------------------------
 
 Rate Package:
-"200: Successfuly rated package"
+"200: Successfully rated package"
 
 curl --location --request DELETE 'https://ece461-project2.ue.r.appspot.com/reset' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
@@ -309,7 +309,7 @@ curl --location --request GET 'https://ece461-project2.ue.r.appspot.com/package/
 ---------------------------------------------------------------------------------------------------------------------------
 
 Reset System:
-"200: Successfuly reset system"
+"200: Successfully reset system"
 curl --location --request DELETE 'https://ece461-project2.ue.r.appspot.com/reset' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
 
@@ -321,7 +321,7 @@ curl --location --request DELETE 'https://ece461-project2.ue.r.appspot.com/reset
 ---------------------------------------------------------------------------------------------------------------------------
 
 Authenticate User:
-"200: Successfuly authenticated user and returned Bearer Token in the response"
+"200: Successfully authenticated user and returned Bearer Token in the response"
 curl --location --request DELETE 'https://ece461-project2.ue.r.appspot.com/reset' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
 
@@ -355,7 +355,7 @@ curl --location --request PUT 'https://ece461-project2.ue.r.appspot.com/authenti
 ---------------------------------------------------------------------------------------------------------------------------
 
 Register User:
-"200: Successfuly registered user."
+"200: Successfully registered user."
 curl --location --request DELETE 'https://ece461-project2.ue.r.appspot.com/reset' \
 --header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
 
@@ -404,9 +404,17 @@ curl --location --request PUT 'https://ece461-project2.ue.r.appspot.com/register
 ---------------------------------------------------------------------------------------------------------------------------
 
 Paginated List of Packages:
-"200: Successfuly returned list of packages"
+"200: Successfully returned list of packages"
+
+curl -i --location --request POST 'https://ece461-project2.ue.r.appspot.com/packages' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
+--data-raw '[
+  {
+    "Name": "*"
+  }
+]'
 
 Paginated List of Packages:
-"500: Some packages in the request have not been uploaded to datastore "
+"500: Some packages in the request have not been uploaded to datastore"
 
 ---------------------------------------------------------------------------------------------------------------------------

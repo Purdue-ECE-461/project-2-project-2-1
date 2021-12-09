@@ -5,7 +5,7 @@ import pytest
 
 
 def test_getpackages_empty_registry():
-    client = get_datastore_client()
+    #client = get_datastore_client()
     clear_registry()
     
     # Make sure an empty registry responds to requests correctly
@@ -37,7 +37,7 @@ def test_getpackages_empty_registry():
     assert response.status_code == 200    
     
 def test_getpackages_full_registry():
-    client = get_datastore_client()
+    #client = get_datastore_client()
     clear_registry()
     # First populate the registry with some packages (they only need Name/Version/ID)
     header = generate_header()
@@ -112,7 +112,7 @@ def test_getpackages_full_registry():
     assert response.status_code == 200
 
 def test_getpackages_partial_registry():
-    client = get_datastore_client()
+    #client = get_datastore_client()
     clear_registry()
     # First populate the registry with some packages (they only need Name/Version/ID)
     header = generate_header()
@@ -189,3 +189,38 @@ def test_getpackages_partial_registry():
     }]
     response = requests.post('http://127.0.0.1:8080/packages', headers=header, json=query)
     assert response.status_code == 200
+    
+def test_getpackages_token():
+   # client = get_datastore_client()
+    clear_registry()
+    
+    header = {'X-Authorization': 'bearer ' + 'garbageAuth'}
+    query = [{
+        "Version": "1.2.3",
+        "Name": "Underscore"
+    },
+    {
+        "Version": "1.2.3-2.1.0",
+        "Name": "Lodash"
+    }]    
+    
+    response = requests.post('http://127.0.0.1:8080/packages', headers=header, json=query)
+    assert response.status_code == 500
+
+def test_getpackages_request_data():
+    #client = get_datastore_client()
+    clear_registry()
+    
+    header = generate_header()
+    query = [{
+        "Versio": "1.2.3",
+        "Nme": "Underscore"
+    },
+    {
+        "Garbage": "1.2.3-2.1.0",
+        "badData": "Lodash"
+    }]
+    
+    response = requests.post('http://127.0.0.1:8080/packages', headers=header, json=query)
+    assert response.status_code == 500
+    
