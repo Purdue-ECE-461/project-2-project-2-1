@@ -23,7 +23,6 @@ def print_to_stdout(*a):
 
 def version_valid_hyphenated_inclusive_upper(request_version, query_version):
     logger.info('Evaluating an inclusive range (x.x.x-x.x.x)')
-    #print("inclusive range (-)", request_version)
     # Pad the query version with zeros as necessary for comparison purposes
     query_version_list = query_version.split('.')
     while(len(query_version_list) < 3):
@@ -37,7 +36,6 @@ def version_valid_hyphenated_inclusive_upper(request_version, query_version):
     for bound in bounds:
         while(len(bound) < 3):
             bound.append("0")
-    #print("new method for bounds- lower:"+'.'.join(bounds[0])+" upper:"+'.'.join(bounds[1]))
     # Now check if queried version is between the bounds of the request
     if '.'.join(bounds[0]) <= '.'.join(query_version_list) and '.'.join(query_version_list) <= '.'.join(bounds[1]):
         return True
@@ -46,7 +44,6 @@ def version_valid_hyphenated_inclusive_upper(request_version, query_version):
 
 def version_valid_hyphenated_exclusive_upper(request_version, query_version):
     logger.info('Evaluating an exclusive range (x.x.x-x.x.x)')
-    #print("exclusive range (-)", request_version)
     # Pad the query version with zeros as necessary for comparison purposes
     query_version_list = query_version.split('.')
     while(len(query_version_list) < 3):
@@ -60,7 +57,6 @@ def version_valid_hyphenated_exclusive_upper(request_version, query_version):
     for bound in bounds:
         while(len(bound) < 3):
             bound.append("0")
-    #print("new method for bounds- lower:"+'.'.join(bounds[0])+" upper:"+'.'.join(bounds[1]))
     # Now check if queried version is between the bounds of the request
     if '.'.join(bounds[0]) <= '.'.join(query_version_list) and '.'.join(query_version_list) < '.'.join(bounds[1]):
         return True
@@ -68,9 +64,7 @@ def version_valid_hyphenated_exclusive_upper(request_version, query_version):
     return False
 
 def version_valid(request_version, query_version):
-    logger.info('Comparing request version:'+request_version+' and query version:'+query_version)
-    #print("Request Version:"+request_version+" -- Query Version:"+query_version)
-    
+    logger.info('Comparing request version:'+request_version+' and query version:'+query_version)    
     # Search versions for alphabet characters, we aren't prepared to see those
     if re.search("[a-zA-Z]",request_version):
         # Invalid request version. Valid version only contains number digits and periods (i.e., "1.2.34")
@@ -88,16 +82,13 @@ def version_valid(request_version, query_version):
             return True
     elif re.search("\^", request_version):
         logger.info('Carat(^) detected in request version. Attempting to evaluate.')
-        #print("changes that do not modify the leftmost nonzero range (^)", request_version)
         # Similar to tilde in complexity below
         # Convert to a lower and upper bound
         # to compare with our query
         # ^1     -> 1     -> >= 1.0.0 and < 2.0.0
         # ^1.0   -> 1.0   -> >= 1.0.0 and < 1.1.0
         # ^1.0.0 -> 1.0.0 -> >= 1.0.0 and <1.1.0
-        #request_version_clean = request_version.strip('^')
         request_version_list = request_version.strip('^').split('.')
-        #print("request_version_list:",request_version_list)
         
         # Check length of list to make sure we have the proper length, otherwise fill with zeros
         # Make sure we don't do any list out of bounds, check length
@@ -107,14 +98,12 @@ def version_valid(request_version, query_version):
                 request_version_list.append("0")
                 
         if '.'.join(request_version_list) == "0.0.0":
-            #lower_bound = "0.0.0" & upper_bound = "0.0.0"
             if version_valid_hyphenated_exclusive_upper('.'.join(request_version_list)+'-'+'.'.join(request_version_list), query_version):
                 return True
             else:
                 return False
         # Compute lower bound from request
         lower_bound_list = request_version.strip('^').split('.')
-        # lower bound = original request version
         if len(lower_bound_list) == 1:
             # This means we only have 1 digit to check
             while(len(lower_bound_list) < 3):
@@ -170,24 +159,19 @@ def version_valid(request_version, query_version):
         else:
             return False
 
-        #print("Cleaned Request Version:"+request_version_clean)
-        #print("Lower Bound Version:"+'.'.join(lower_bound_list))
-        #print("Upper Bound Version:"+'.'.join(upper_bound_list))
         new_request_bounds = '.'.join(lower_bound_list)+'-'+'.'.join(upper_bound_list)
-        #print("New Request Bounds:", new_request_bounds)
         if version_valid_hyphenated_exclusive_upper(new_request_bounds, query_version):
             return True
 
     elif re.search("~", request_version):
         logger.info('Tilde(~) detected in request version. Attempting to evaluate.')        
-        #print("patch or minor version (rightmost) (~)", request_version)
         # Need to take request in, remove tilde, then evaluate the version
         # We need to convert the tilde version into a lower and an upper bound
         # to compare our query with (basically convert the tilde to a hyphen range)
         # ~1     -> 1     -> >= 1.0.0 and < 2.0.0
         # ~1.0   -> 1.0   -> >= 1.0.0 and < 1.1.0
         # ~1.0.0 -> 1.0.0 -> >= 1.0.0 and <1.1.0
-        #request_version_clean = request_version.strip('~')
+
         
         # Compute lower bound from request
         lower_bound_list = request_version.strip('~').split('.')
@@ -221,11 +205,7 @@ def version_valid(request_version, query_version):
             # The request version was not a valid input, fail to match
             return False
         
-        #print("Cleaned Request Version:"+request_version_clean)
-        #print("Lower Bound Version:"+'.'.join(lower_bound_list))
-        #print("Upper Bound Version:"+'.'.join(upper_bound_list))
         new_request_bounds = '.'.join(lower_bound_list)+'-'+'.'.join(upper_bound_list)
-        #print("New Request Bounds:", new_request_bounds)
         if version_valid_hyphenated_exclusive_upper(new_request_bounds, query_version):
             return True
     else:
@@ -233,7 +213,6 @@ def version_valid(request_version, query_version):
         # This is an exact version request
         # Need to be careful of 1.0.0 == 1.0 == 1
         # Adjust those IN the 
-        #request_version_list = request_version.strip('^').split('.')  
         if version_valid_hyphenated_inclusive_upper(request_version+'-'+request_version,query_version):
             return True
     # Matching has failed, return False
@@ -243,7 +222,6 @@ class GetPackages(Resource):
     def post(self):
         logger.info('Executing POST /packages?<string:offset> endpoint...')
         logger.info('Getting request data...')
-        #print("----------------BEGIN GETPACKAGES--------------") #TODO remove
         request.get_data() # Get everything from the request/URL (path params)
         # Get the offset from request url
         if request.args.get("offset"):
@@ -307,11 +285,8 @@ class GetPackages(Resource):
                     "message": "Package Name(s) do not match any packages currently in registry."
                 }
                 return response, 200, {"offset": str(offset) +'--'+offset_msg}
-            # Print out raw query results
-            #print_to_stdout("RAW QUERY RESULTS:",package_results_all) #TODO remove
-            #print_to_stdout("json load QUERY RESULTS", json.loads(package_results_all))
+
             # Attempt to parse the query
-            #query_package_dict = {}
             query_output_all = []
             for package in package_results_all:
                 #query_package_dict[package['Name']] = [package['Name'],package['Version'],package['ID']]
@@ -319,10 +294,6 @@ class GetPackages(Resource):
                         "Name": package['Name'],
                         "Version": package['Version'],
                         "ID" : package['ID']})
-            #print_to_stdout(json.dumps(query_output_all, sort_keys=True, indent=2))
-            #for key in query_package_dict.keys():    
-            #    print_to_stdout("QUERY DICT:",query_package_dict[key][0:3])
-               
             
             # Pagination process below
             #remainder = len(query_output_all) % 10
@@ -350,13 +321,11 @@ class GetPackages(Resource):
                     offset_msg = "Showing Page #"+str(offset+1)+". For next page, offset="+str(offset+1)
                 else:
                     offset_msg = "Showing Page #"+str(offset+1)+". This is the Final Page of Results."
-                #print_to_stdout(json.dumps(page_list[offset], sort_keys=True, indent=2))
             else:
                 if 10 < len(query_output_all):
                     offset_msg = "Offset does not match results. Showing page 1 instead."+" For next page, offset="+str(1)
                 else:
                     offset_msg = "Offset does not match results. Showing all results."
-                #print_to_stdout(json.dumps(page_list[0], sort_keys=True, indent=2))
             # Actual Output Response
             logger.info('Successful output of entire registry. Returning from packages.')
             response = json.loads(json.dumps(page_list[0], sort_keys=True, indent=2))
@@ -382,7 +351,6 @@ class GetPackages(Resource):
             for package_name in request_dict.keys():
                 query = datastore_client.query(kind='package')
                 query.add_filter("Name", "=", package_name)
-                #query.projection = ["Name", "Version", "ID"]
                 package_results.append(list(query.fetch()))
         
 
@@ -395,14 +363,8 @@ class GetPackages(Resource):
                     "message": "Package Name(s) do not match any packages currently in registry."
                 }
                 return response, 200, {"offset": str(offset) +'--'+offset_msg}
-            
-            
-            # Print out raw query results
-            #print_to_stdout("Length of Raw Query Results:",len(package_results))
-            #print_to_stdout("RAW QUERY RESULTS:",package_results) #TODO remove 
-            #print_to_stdout("json load QUERY RESULTS", json.loads(package_results))
-            # Attempt to parse the query
-            
+
+            # Attempt to parse the query   
             query_output = []
             for inner_list in package_results:
                 for package in inner_list:
@@ -410,29 +372,21 @@ class GetPackages(Resource):
                             "Name": package['Name'],
                             "Version": package['Version'],
                             "ID" : package['ID']})
-                #query_output[package['Name']] = package['Version']
-                #print_to_stdout("",package['Name'],package['Version'])
-            #print_to_stdout("Query Dictionary Here:")
-            #for package in query_output:
-            #    print_to_stdout(package)
             
             # HERE IS WHERE WE PUT IN THE SEMANTIC VERSIONING  
             # Check the query output, a list of dictionaries that each contain a package from our registry
-            # The versions in the registry need to be checked to see if they match the version request
-            # So we need to match up the 
+            # The versions in the registry need to be checked to see if they match the version request 
             
             query_output_match = []
             for request_package_name in request_dict.keys():
                 for query_package in query_output:
                     if request_package_name in query_package.values():
                         logger.info('Name match found in registry. Now checking if version matches.')
-                        #print_to_stdout("match found, now compare versions from request & query")# this means that the package was found, so let's check it's version!
-                        #print_to_stdout("Request Version:",request_dict[request_package_name],"-- Query Version:",query_package["Version"])
                         if version_valid(request_dict[request_package_name],query_package["Version"]):
                             logger.info('Version match found. Adding match to output.')
                             query_output_match.append(query_package)
                     else:
-                        #TODO this means no match is found, could put logging here TODO
+                        #this means no match is found, could put logging here
                         pass
             # Are there any matches to return. i.e., is the match list empty
             # Check to see if these Package name(s) actually exist in the registry
@@ -447,7 +401,6 @@ class GetPackages(Resource):
             
             # We have matches. Time to Paginate them:
             # Pagination process below
-            #remainder = len(query_output_match) % 10
             tens = len(query_output_match) // 10
             x = 0
             if len(query_output_match) % 10 == 0:
@@ -472,13 +425,11 @@ class GetPackages(Resource):
                     offset_msg = "Showing Page #"+str(offset+1)+". For next page, offset="+str(offset+1)
                 else:
                     offset_msg = "Showing Page #"+str(offset+1)+". This is the Final Page of Results."
-                print_to_stdout(json.dumps(page_list[offset], sort_keys=True, indent=2))
             else:
                 if 10 < len(query_output_match):
                     offset_msg = "Offset does not match results. Showing page 1 instead."+" For next page, offset="+str(1)
                 else:
                     offset_msg = "Offset does not match results. Showing all results."
-                #print_to_stdout(json.dumps(page_list[0], sort_keys=True, indent=2))
             # Actual Output Response
             logger.info('Successful output of partial registry. Returning from packages.')            
             response = json.loads(json.dumps(page_list[0], sort_keys=True, indent=2))
@@ -490,19 +441,6 @@ class GetPackages(Resource):
             "code": 200,
             "message": "No packages matched Query or the Registry is empty."#package_results
         }
-        return response, 200, {"offset": str(offset) +'--'+offset_msg} #TODO {}offset .header for testing #just randomly chose 200 
-    
-        # TODO - Take list of packages from above, and check the versions with
-        # the request body versions (use regex to evaluate the versioning)
-        
-        # Take Final list of packages and paginate them using offset from URL
-        # Print out the Paginated list? or return it? stdout? Ah they want them in a json format. Use
-        # Return offset with the .json, check .yaml and Postman to confirm
-        
-        # TODO - UNIT Testing
-        
-        # TODO - Logging
-        
-        # TODO - More intuitive offset response, we are barebones right now.
+        return response, 200, {"offset": str(offset) +'--'+offset_msg}
         # TODO - Refactor Pagination into a helper function
         
