@@ -414,7 +414,55 @@ curl -i --location --request POST 'https://ece461-project2.ue.r.appspot.com/pack
   }
 ]'
 
+curl -i --location --request POST 'https://ece461-project2.ue.r.appspot.com/packages?offset=10' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
+--data-raw '[
+  {
+    "Version": "1.2.3",
+    "Name": "Underscore"
+  },
+  {
+    "Version": "1.2.3-2.1.0",
+    "Name": "Lodash"
+  }
+]'
+
+curl -i --location --request POST 'https://ece461-project2.ue.r.appspot.com/packages?offset=2' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
+--data-raw '[
+  {
+    "Version": "1.2.3",
+    "Name": "Underscore"
+  }
+]'
+
 Paginated List of Packages:
-"500: Some packages in the request have not been uploaded to datastore"
+"500: Improper authentication token or improper request data"
+
+curl -i --location --request POST 'https://ece461-project2.ue.r.appspot.com/packages?offset=10' \
+--header 'X-Authorization: bearer garbage' \
+--data-raw '[
+  {
+    "Version": "1.2.3",
+    "Name": "Underscore"
+  },
+  {
+    "Version": "1.2.3-2.1.0",
+    "Name": "Lodash"
+  }
+]'
+
+curl -i --location --request POST 'https://ece461-project2.ue.r.appspot.com/packages?offset=2' \
+--header 'X-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' \
+--data-raw '[
+  {
+    "sdfd": "1.2.3",
+    "Thgfhdk": "Underscore"
+  },
+  {
+    "Garbage": "1.2.3-2.1.0",
+    "badData": "Lodash"
+  }
+]'
 
 ---------------------------------------------------------------------------------------------------------------------------

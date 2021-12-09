@@ -190,7 +190,7 @@ def test_getpackages_partial_registry():
     response = requests.post('http://127.0.0.1:8080/packages', headers=header, json=query)
     assert response.status_code == 200
     
-def test_getpackages_token():
+def test_getpackages_bad_token():
    # client = get_datastore_client()
     clear_registry()
     
@@ -207,14 +207,14 @@ def test_getpackages_token():
     response = requests.post('http://127.0.0.1:8080/packages', headers=header, json=query)
     assert response.status_code == 500
 
-def test_getpackages_request_data():
+def test_getpackages_bad_request_data():
     #client = get_datastore_client()
     clear_registry()
     
     header = generate_header()
     query = [{
-        "Versio": "1.2.3",
-        "Nme": "Underscore"
+        "sdfd": "1.2.3",
+        "Thgfhdk": "Underscore"
     },
     {
         "Garbage": "1.2.3-2.1.0",
