@@ -23,9 +23,8 @@ def test_register_200():
 
     response = response.json()
 
-    query = client.query(kind='user')
-    query.add_filter("name", "=", "newUser")
-    user_entity = list(query.fetch())[0]
+    key = client.key('user', 'newUser')
+    user_entity = client.get(key)
 
     assert user_entity['name'] == "newUser"
     assert user_entity['isAdmin'] == "True"
@@ -55,9 +54,8 @@ def test_register_401_not_admin():
 
     # Now, "newUser1" (NOT admin) is registering "newUser2" (is an admin)
     # get "newUser1"'s header:
-    query = client.query(kind='user')
-    query.add_filter('name', '=', 'newUser1')
-    user_entity = list(query.fetch())[0]
+    key = client.key('user', 'newUser1')
+    user_entity = client.get(key)
 
     auth_token = user_entity['bearerToken']
     header = {'X-Authorization': 'bearer ' + auth_token}

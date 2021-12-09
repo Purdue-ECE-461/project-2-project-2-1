@@ -1,19 +1,19 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Project 2 REST API Testing (CI)
+name: Project 2 Deployment (CD)
 
 # Controls when the workflow will run
 on:
   # Triggers the workflow on pull request events but only for the main branch
-  pull_request:
+  push:
     branches: [ main ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build
+  build_and_deploy:
+    name: Build and Deploy
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -52,3 +52,6 @@ jobs:
           python main.py &
           sleep 10
           coverage run -m pytest tests/ && coverage report -m
+          
+      - name: Deploy to App Engine
+        run: gcloud app deploy --quiet
