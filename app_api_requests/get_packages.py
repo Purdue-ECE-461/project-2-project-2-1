@@ -29,7 +29,6 @@ def version_valid_hyphenated_inclusive_upper(request_version, query_version):
         query_version_list.append("0")
     # now we know that the request_version is of the form x-x, where x could be 1, 1.0, 1.0.0, etc.
     bounds = [bound.split('.') for bound in request_version.split('-')]
-    print(bounds)
     # Make sure we don't do any list out of bounds, check length
     if len(bounds) != 2:
         return False
@@ -50,7 +49,6 @@ def version_valid_hyphenated_exclusive_upper(request_version, query_version):
         query_version_list.append("0")
     # now we know that the request_version is of the form x-x, where x could be 1, 1.0, 1.0.0, etc.
     bounds = [bound.split('.') for bound in request_version.split('-')]
-    print(bounds)
     # Make sure we don't do any list out of bounds, check length
     if len(bounds) != 2:
         return False
@@ -303,7 +301,6 @@ class GetPackages(Resource):
                 page_list = [[] for x in range(0,tens)]
             else:
                 page_list = [[] for x in range(0,tens+1)]
-            print(page_list)
             x = 0
             i = 0
             for package in query_output_all:
@@ -407,7 +404,6 @@ class GetPackages(Resource):
                 page_list = [[] for x in range(0,tens)]
             else:
                 page_list = [[] for x in range(0,tens+1)]
-            print(page_list)
             x = 0
             i = 0
             for package in query_output_match:
