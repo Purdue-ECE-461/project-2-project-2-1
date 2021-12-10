@@ -82,13 +82,12 @@ class CreatePackage(Resource):
         package_url = ""
         package_content = ""
         store_content = False
-        url_provided = False
 
         # Check the "Content" field
         try:
             package_content = data_dict['data']['Content']
             logger.info("Successfully got Content from the request body. Presumably Package Creation.") # Content field DOES exist
-            url_provided = False # if there's a content field, then the URL clearly wasn't provided
+
             # ONLY SAVE THE CONTENT FIELD TO DATASTORE: if it is < 1MB
             content_string_size_bytes = utf8len(package_content)
             logger.info("Size of content string (in bytes): " + str(content_string_size_bytes))
@@ -105,7 +104,6 @@ class CreatePackage(Resource):
             logger.info("Presumbly indicating Ingestion, since exception when getting Content from the request body. ")
             package_url = data_dict['data']['URL']
             logger.info("Package URL from the request body: " + package_url)
-            url_provided = True            
             # Check the rating scores.
             # IF: any scores < 0.5
             # THEN: don't upload the package
@@ -178,18 +176,13 @@ class CreatePackage(Resource):
         package_entity['ID'] = package_id
 
         if (store_content): # == True
-             package_entity['Content'] = package_content # use the value that we extracted from teh request body.
-             # it's <1MB, so we can store it in the datastore
+            package_entity['Content'] = package_content # use the value that we extracted from teh request body.
+            # it's <1MB, so we can store it in the datastore
         else: 
             package_entity['Content'] = "" 
             # either Content is TOO LARGE, or it wasn't provided in the request body (and the URL was). so set it to "".
 
-        if (url_provided): # == True
-            package_entity['URL'] = package_url # URL is updated from "" to an actual value --> later in the code
-            logger.info("Package URL: " + package_url)
-        else:
-            package_entity['URL'] = ""
-            package_url = ""
+        package_entity['URL'] = package_url
 
         package_entity['JSProgram'] = package_js_program
         package_entity['RampUp'] = -1
@@ -296,18 +289,23 @@ class CreatePackage(Resource):
                     logger.info("Getting URL via array indexing... ")
                     url = data['repository']['url']
                     logger.info("URL from the package.json: " + str(url) )
+                    print_to_stdout("Package URL BEFORE trimming: " + str(url))
+                    package_url = str(url)
                     
-                    if ( str(url[4:]) == "git+"): # trim the "git+" off the START of the URL
+                    if ( str(package_url[0:4]) == "git+"): # trim the "git+" off the START of the URL
                         logger.info("Removing the git+ off the start of the URL... ")
-                        package_url = url[4:] # trim the "git+" off the start of the URL
+                        package_url = package_url[4:] # trim the "git+" off the start of the URL
+                        logger.info("Package URL after git+: " + package_url)
                     
-                    if ( str(url[4:]) == ".git"): # trim the ".git" off the end of the URL
+                    size = len(package_url)
+                    if ( str(package_url[(size - 4):size]) == ".git"): # trim the ".git" off the end of the URL
                         logger.info("Removing the .git off the END of the URL... ")
-                        size = len(package_url)
                         package_url = package_url[:size - 4] # trim the ".git" off the END of the URL
+                        logger.info("Package URL after .git: " + package_url)
                     
                     logger.info("Saving the retreived URL to the package_entity...")
                     package_entity['URL'] = package_url
+                    print_to_stdout("Package URL AFTER trimming: " + package_url)
 
                     logger.info("Package URL from package.json: " + package_url)
 
