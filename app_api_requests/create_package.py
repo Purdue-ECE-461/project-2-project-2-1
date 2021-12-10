@@ -43,9 +43,19 @@ class CreatePackage(Resource):
         datastore_client = get_datastore_client()
         
         # User Authentication:
-        auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
-        token = auth_header.split()[1] # token = "[token]"
-        logger.info('Token: ' + token)
+        try:
+            auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
+            logger.info('X-Authorization was included. Getting bearer token...')
+            token = auth_header.split()[1] # token = "[token]"
+            logger.info('Token: ' + token)
+        except:
+            # User didn't include authorization in their request
+            logger.error('X-Authorization was NOT included in the request.')
+            response = {
+                'message': "X-Authorization / Bearer Token was NOT included in the request.",
+            }
+            return response, 400
+
         
         # If token is in the database --> valid user
         query = datastore_client.query(kind='user')
