@@ -27,6 +27,7 @@ class Authenticate(Resource):
         
         decoded_data = request.data.decode("utf-8")
         request_body = json.loads(decoded_data)
+        logger.info(request_body)
         
         try:
             input_name = request_body['User']['name']

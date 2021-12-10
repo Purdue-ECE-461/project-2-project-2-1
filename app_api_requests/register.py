@@ -32,9 +32,11 @@ class Register(Resource):
         logger.info('Executing PUT /register/:current_user_name endpoint...')
         logger.info('Getting request data...')
         request.get_data()
-        
+        logger.info(request.get_data())
+
         decoded_data = request.data.decode("utf-8")
         request_body = json.loads(decoded_data)
+        logger.info(request_body)
 
         # Get the inputted "current_user_name" from the URL path
         current_username = request.view_args['current_user_name']

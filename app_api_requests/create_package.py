@@ -40,6 +40,8 @@ class CreatePackage(Resource):
         logger.info('Executing POST /package endpoint...')
         logger.info('Getting request data...')
         request.get_data()
+        logger.info(request.get_data())
+
         datastore_client = get_datastore_client()
         
         # User Authentication:
@@ -73,6 +75,7 @@ class CreatePackage(Resource):
     
         decoded_data = request.data.decode("utf-8")
         data_dict = json.loads(decoded_data)
+        logger.info(data_dict)
         
         try:
             package_name = data_dict['metadata']['Name']

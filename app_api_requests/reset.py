@@ -19,6 +19,7 @@ class Reset(Resource):
         logger.info('Executing /reset endpoint...')
         logger.info('Getting request data...')
         request.get_data()
+        logger.info(request.get_data())
         
         # User Authentication:
         try:

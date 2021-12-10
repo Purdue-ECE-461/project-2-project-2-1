@@ -46,6 +46,7 @@ class PackageById(Resource): # also why is this a POST request
         logger.info('Executing PUT /package/:id endpoint...')
         logger.info('Getting request data...')
         request.get_data() # Get everything from the request/URL (path params)
+        logger.info(request.get_data())
 
         # User Authentication:
         try:
@@ -85,6 +86,7 @@ class PackageById(Resource): # also why is this a POST request
         logger.info("Decoding json...")
         decoded_data = request.data.decode("utf-8") # Decode body of the data
         request_body = json.loads(decoded_data)
+        logger.info(request_body)
         
         try:
             new_package_name = request_body['metadata']['Name']
@@ -190,6 +192,7 @@ class PackageById(Resource): # also why is this a POST request
         logger.info('Executing GET /package/:id endpoint...')
         logger.info('Getting request data...')
         request.get_data() # Get everything from the request/URL (path params)
+        logger.info(request.get_data())
 
         # User Authentication:
         try:
@@ -369,6 +372,7 @@ class PackageById(Resource): # also why is this a POST request
         logger.info('Executing DELETE /package/:id endpoint...')
         logger.info('Getting request data...')
         request.get_data() # Get everything from the request/URL (path params)
+        logger.info(request.get_data())
 
         # User Authentication:
         try:

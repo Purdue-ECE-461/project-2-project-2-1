@@ -18,6 +18,7 @@ class RatePackage(Resource):
         logger.info('Executing GET /package/:id/rate endpoint...')
         logger.info('Getting request data...')
         request.get_data()
+        logger.info(request.get_data())
         
         # User Authentication:
         try:

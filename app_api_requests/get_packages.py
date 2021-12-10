@@ -221,6 +221,8 @@ class GetPackages(Resource):
         logger.info('Executing POST /packages?<string:offset> endpoint...')
         logger.info('Getting request data...')
         request.get_data() # Get everything from the request/URL (path params)
+        logger.info(request.get_data())
+
         # Get the offset from request url
         if request.args.get("offset"):
             offset = int(request.args.get("offset"))
@@ -264,6 +266,8 @@ class GetPackages(Resource):
         logger.info("Decoding json...")
         decoded_data = request.data.decode("utf-8") # Decode body of the data
         request_body = json.loads(decoded_data)
+        logger.info(request_body)
+        
         # For get_packages, request_body is a list of dictionaries that contain a
         # name and version (can be multiple versions....)
         full_registry = False
