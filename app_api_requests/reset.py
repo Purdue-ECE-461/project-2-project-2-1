@@ -19,11 +19,21 @@ class Reset(Resource):
         logger.info('Executing /reset endpoint...')
         logger.info('Getting request data...')
         request.get_data()
+        logger.info(request.get_data())
         
         # User Authentication:
-        auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
-        token = auth_header.split()[1] # token = "[token]"
-        logger.info('Token: ' + token)
+        try:
+            auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
+            logger.info('X-Authorization was included. Getting bearer token...')
+            token = auth_header.split()[1] # token = "[token]"
+            logger.info('Token: ' + token)
+        except Exception:
+            # User didn't include authorization in their request
+            logger.error('X-Authorization was NOT included in the request.')
+            response = {
+                'message': "X-Authorization / Bearer Token was NOT included in the request.",
+            }
+            return response, 401
         
         # If token is in the database --> valid user
         datastore_client = get_datastore_client()

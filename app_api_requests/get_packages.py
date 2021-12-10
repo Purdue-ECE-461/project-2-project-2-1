@@ -221,6 +221,8 @@ class GetPackages(Resource):
         logger.info('Executing POST /packages?<string:offset> endpoint...')
         logger.info('Getting request data...')
         request.get_data() # Get everything from the request/URL (path params)
+        logger.info(request.get_data())
+
         # Get the offset from request url
         if request.args.get("offset"):
             offset = int(request.args.get("offset"))
@@ -231,9 +233,18 @@ class GetPackages(Resource):
         offset_msg = ""
         
         # User Authentication:
-        auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
-        token = auth_header.split()[1] # token = "[token]"
-        logger.info('Token: ' + token)
+        try:
+            auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
+            logger.info('X-Authorization was included. Getting bearer token...')
+            token = auth_header.split()[1] # token = "[token]"
+            logger.info('Token: ' + token)
+        except Exception:
+            # User didn't include authorization in their request
+            logger.error('X-Authorization was NOT included in the request.')
+            response = {
+                'message': "X-Authorization / Bearer Token was NOT included in the request.",
+            }
+            return response, 500
         
         # If token is in the database --> valid user
         datastore_client = datastore.Client()
@@ -255,6 +266,8 @@ class GetPackages(Resource):
         logger.info("Decoding json...")
         decoded_data = request.data.decode("utf-8") # Decode body of the data
         request_body = json.loads(decoded_data)
+        logger.info(request_body)
+        
         # For get_packages, request_body is a list of dictionaries that contain a
         # name and version (can be multiple versions....)
         full_registry = False

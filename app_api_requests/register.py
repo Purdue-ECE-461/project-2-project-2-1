@@ -32,9 +32,11 @@ class Register(Resource):
         logger.info('Executing PUT /register/:current_user_name endpoint...')
         logger.info('Getting request data...')
         request.get_data()
-        
+        logger.info(request.get_data())
+
         decoded_data = request.data.decode("utf-8")
         request_body = json.loads(decoded_data)
+        logger.info(request_body)
 
         # Get the inputted "current_user_name" from the URL path
         current_username = request.view_args['current_user_name']
@@ -44,9 +46,18 @@ class Register(Resource):
         # (b) isAdmin == TRUE
 
         # (a) Current_User Authentication:
-        auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
-        token = auth_header.split()[1] # token = "[token]"
-        logger.info('Token: ' + token)
+        try:
+            auth_header = request.headers.get('X-Authorization') # auth_header = "bearer [token]"
+            logger.info('X-Authorization was included. Getting bearer token...')
+            token = auth_header.split()[1] # token = "[token]"
+            logger.info('Token: ' + token)
+        except Exception:
+            # User didn't include authorization in their request
+            logger.error('X-Authorization was NOT included in the request.')
+            response = {
+                'message': "X-Authorization / Bearer Token was NOT included in the request.",
+            }
+            return response, 401
 
         # If token is in the database --> valid user
         # datastore_client = datastore.Client()
