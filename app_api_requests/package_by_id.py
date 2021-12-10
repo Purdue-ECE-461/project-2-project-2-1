@@ -246,7 +246,9 @@ class PackageById(Resource): # also why is this a POST request
                 # We need to use the new_package_url --> to get the encoded-base64-content string
                 # Use the "URL" field to clone repo
                 logger.info("Getting the repo_name from the package_url...")
+                
                 repo_name = package_url.split('.git')[0].split('/')[-1]
+                
                 logger.info("repo_name: "+ repo_name)
 
                 logger.info("Cloning repo...")

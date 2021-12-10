@@ -81,16 +81,31 @@ class CreatePackage(Resource):
         # Set variables to "". They will get overwritten if the request_body has the values.
         package_url = ""
         package_content = ""
+        store_content = False
+        url_provided = False
 
         # Check the "Content" field
         try:
             package_content = data_dict['data']['Content']
-            logger.info("Successfully got Content from the request body. Presumably Package Creation.")
-        except Exception: # if try fails --> No "Content" field --> Ingestion
+            logger.info("Successfully got Content from the request body. Presumably Package Creation.") # Content field DOES exist
+            url_provided = False # if there's a content field, then the URL clearly wasn't provided
+            # ONLY SAVE THE CONTENT FIELD TO DATASTORE: if it is < 1MB
+            content_string_size_bytes = utf8len(package_content)
+            logger.info("Size of content string (in bytes): " + str(content_string_size_bytes))
+            if ( content_string_size_bytes < 1000000 ):
+                logger.info("Storing content string in database, because it's <1MB")
+                store_content = True
+                # package_entity['Content'] = package_content # Content is updated from "" to an actual value --> later in the code
+            else:
+                logger.info("Content string is >1MB. Too large to be stored. URL is extracted later, and is stored in datastore.")
+                store_content = False
+
+        except Exception: # if try fails --> No "Content" field provided --> Ingestion
             # For Ingestion, the "URL" field is in request_body
             logger.info("Presumbly indicating Ingestion, since exception when getting Content from the request body. ")
             package_url = data_dict['data']['URL']
-
+            logger.info("Package URL from the request body: " + package_url)
+            url_provided = True            
             # Check the rating scores.
             # IF: any scores < 0.5
             # THEN: don't upload the package
@@ -162,19 +177,19 @@ class CreatePackage(Resource):
         package_entity['Version'] = package_version
         package_entity['ID'] = package_id
 
-        # If Ingestion: URL is given, but Content is ""
-        # If Creation: Content is given, but URL is ""
-        content_string_size_bytes = utf8len(package_content)
-        logger.info("Size of content string (in bytes): " + str(content_string_size_bytes))
-        if ( content_string_size_bytes < 1000000 ):
-            logger.info("Storing content string in database, because it's <1MB")
-            package_entity['Content'] = package_content # Content is updated from "" to an actual value --> later in the code
-        else:
-            logger.info("Content string is >1MB. Too large to be stored. URL is extracted later, and is stored in datastore.")
-            package_entity['Content'] = ""
+        if (store_content): # == True
+             package_entity['Content'] = package_content # use the value that we extracted from teh request body.
+             # it's <1MB, so we can store it in the datastore
+        else: 
+            package_entity['Content'] = "" 
+            # either Content is TOO LARGE, or it wasn't provided in the request body (and the URL was). so set it to "".
 
-        package_entity['URL'] = package_url # URL is updated from "" to an actual value --> later in the code
-        logger.info("Package URL: " + package_url)
+        if (url_provided): # == True
+            package_entity['URL'] = package_url # URL is updated from "" to an actual value --> later in the code
+            logger.info("Package URL: " + package_url)
+        else:
+            package_entity['URL'] = ""
+            package_url = ""
 
         package_entity['JSProgram'] = package_js_program
         package_entity['RampUp'] = -1
@@ -227,7 +242,7 @@ class CreatePackage(Resource):
                     logger.info("Got the zipOj. Going through the folders to get the one with package.json... ")
                     for info in zipObj.infolist():
                         if (info.is_dir()):
-                            if "_" not in (info.filename):
+                            if "_" not in (info.filename): #if (info.filename) == ((package_id) + "/"):
                                 names.append(info.filename) # only want the folder that holds the package.json
                     
                     logger.info("Folder names in the zipfile: ")
@@ -280,13 +295,16 @@ class CreatePackage(Resource):
 
                     logger.info("Getting URL via array indexing... ")
                     url = data['repository']['url']
+                    logger.info("URL from the package.json: " + str(url) )
                     
-                    logger.info("Removing the git+ off the start of the URL... ")
-                    package_url = url[4:] # trim the "git+" off the start of the URL
+                    if ( str(url[4:]) == "git+"): # trim the "git+" off the START of the URL
+                        logger.info("Removing the git+ off the start of the URL... ")
+                        package_url = url[4:] # trim the "git+" off the start of the URL
                     
-                    size = len(package_url)
-                    logger.info("Removing the .git off the end of the URL.. ")
-                    package_url = package_url[:size - 4] # trim the ".git" off the end of the URL
+                    if ( str(url[4:]) == ".git"): # trim the ".git" off the end of the URL
+                        logger.info("Removing the .git off the END of the URL... ")
+                        size = len(package_url)
+                        package_url = package_url[:size - 4] # trim the ".git" off the END of the URL
                     
                     logger.info("Saving the retreived URL to the package_entity...")
                     package_entity['URL'] = package_url
