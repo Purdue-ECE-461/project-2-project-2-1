@@ -25,7 +25,7 @@ class RatePackage(Resource):
             logger.info('X-Authorization was included. Getting bearer token...')
             token = auth_header.split()[1] # token = "[token]"
             logger.info('Token: ' + token)
-        except:
+        except Exception:
             # User didn't include authorization in their request
             logger.error('X-Authorization was NOT included in the request.')
             response = {
