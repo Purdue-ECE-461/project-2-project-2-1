@@ -122,6 +122,7 @@ class CreatePackage(Resource):
             # THEN: don't upload the package
             
             # Calculate scores
+            package_url = parse_package_url(package_url)
             scores = compute_package_scores(package_url)
             print_to_stdout(scores)
             valid_scores = ( (float(scores["RAMP_UP_SCORE"]) >= 0.5)
