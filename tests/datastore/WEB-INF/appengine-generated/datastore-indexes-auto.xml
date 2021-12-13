@@ -1,0 +1,12 @@
+<!-- Indices written at Fri, 10 Dec 2021 19:59:22 UTC -->
+
+<datastore-indexes autoGenerate="true">
+
+    <!-- Used 12 times in query history -->
+    <datastore-index kind="package" ancestor="false" source="auto">
+        <property name="ID" direction="asc"/>
+        <property name="Name" direction="asc"/>
+        <property name="Version" direction="asc"/>
+    </datastore-index>
+
+</datastore-indexes>
