@@ -375,7 +375,7 @@ class CreatePackage(Resource):
             package_entity['Content'] = encode_string
             # print_to_stdout(encode_string)
         """
-        
+        package_url = parse_package_url(package_url)
         logger.info("Computing scores...")
         scores = compute_package_scores(package_url)
         
