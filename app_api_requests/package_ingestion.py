@@ -1,10 +1,19 @@
 from app_api_requests.datastore_client_factory import get_datastore_client
 from app_api_requests.package_rating.metrics import Metric
 import logging
+import re
 
 import os
 
 from google.cloud import datastore
+
+def parse_package_url(package_url):
+    m = re.search(r'github.com/.+/.+', package_url) # extracts part of URL that has github.com/user/package_name
+    parsed = m.group(0)
+    parsed = parsed.replace(r'.git', '') # remove .git if needed
+    parsed = r'https://' + parsed # adds https://
+
+    return parsed
 
 def compute_package_scores(package_url):
     log = logging.getLogger()
