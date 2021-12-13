@@ -216,7 +216,6 @@ class CreatePackage(Resource):
             try:
                 logger.info("getting decoded_bytes...")
                 decoded_bytes = base64.b64decode(package_content)
-                logger.info(decoded_bytes)
                 
                 # create a /tmp directory
                 path = "/tmp"
