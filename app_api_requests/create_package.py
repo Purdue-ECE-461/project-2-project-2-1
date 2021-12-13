@@ -7,7 +7,7 @@ import json
 import sys
 import base64
 
-from app_api_requests.package_ingestion import compute_package_scores
+from app_api_requests.package_ingestion import compute_package_scores, parse_package_url
 from app_api_requests.datastore_client_factory import get_datastore_client
 
 from zipfile import ZipFile
@@ -304,17 +304,20 @@ class CreatePackage(Resource):
                     logger.info("URL from the package.json: " + str(url) )
                     print_to_stdout("Package URL BEFORE trimming: " + str(url))
                     package_url = str(url)
+
+                    package_url = parse_package_url(package_url)
+                    logger.info("Package URL after parsing: " + package_url)
                     
-                    if ( str(package_url[0:4]) == "git+"): # trim the "git+" off the START of the URL
-                        logger.info("Removing the git+ off the start of the URL... ")
-                        package_url = package_url[4:] # trim the "git+" off the start of the URL
-                        logger.info("Package URL after git+: " + package_url)
+                    # if ( str(package_url[0:4]) == "git+"): # trim the "git+" off the START of the URL
+                    #     logger.info("Removing the git+ off the start of the URL... ")
+                    #     package_url = package_url[4:] # trim the "git+" off the start of the URL
+                    #     logger.info("Package URL after git+: " + package_url)
                     
-                    size = len(package_url)
-                    if ( str(package_url[(size - 4):size]) == ".git"): # trim the ".git" off the end of the URL
-                        logger.info("Removing the .git off the END of the URL... ")
-                        package_url = package_url[:size - 4] # trim the ".git" off the END of the URL
-                        logger.info("Package URL after .git: " + package_url)
+                    # size = len(package_url)
+                    # if ( str(package_url[(size - 4):size]) == ".git"): # trim the ".git" off the end of the URL
+                    #     logger.info("Removing the .git off the END of the URL... ")
+                    #     package_url = package_url[:size - 4] # trim the ".git" off the END of the URL
+                    #     logger.info("Package URL after .git: " + package_url)
                     
                     logger.info("Saving the retreived URL to the package_entity...")
                     package_entity['URL'] = package_url
